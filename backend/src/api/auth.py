@@ -16,6 +16,7 @@ from ..schemas.auth import (
     MessageResponse
 )
 from ..services.auth_service import AuthService
+from ..utils.logging import logger, set_user_context
 
 
 router = APIRouter(prefix="/auth", tags=["authentication"])
@@ -36,10 +37,23 @@ async def register(
     """
     auth_service = AuthService(db)
     
+    logger.info("user_registration_attempt", email=user_data.email, role=user_data.role)
+    
     try:
         user = await auth_service.register(user_data)
+        logger.info(
+            "user_registered",
+            user_id=str(user.id),
+            email=user.email,
+            role=user.role.value
+        )
         return user
     except ValueError as e:
+        logger.warning(
+            "user_registration_failed",
+            email=user_data.email,
+            reason=str(e)
+        )
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail=str(e)
@@ -58,8 +72,21 @@ async def login(
     """
     auth_service = AuthService(db)
     
+    logger.info("login_attempt", email=login_data.email)
+    
     try:
         user, tokens = await auth_service.login(login_data)
+        
+        # Set user context for subsequent logs in this request
+        set_user_context(user_id=str(user.id), username=user.email)
+        
+        logger.info(
+            "login_successful",
+            user_id=str(user.id),
+            email=user.email,
+            role=user.role.value
+        )
+        
         return TokenResponse(
             access_token=tokens.access_token,
             refresh_token=tokens.refresh_token,
@@ -67,6 +94,11 @@ async def login(
             user=UserResponse.from_orm(user)
         )
     except ValueError as e:
+        logger.warning(
+            "login_failed",
+            email=login_data.email,
+            reason=str(e)
+        )
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail=str(e),

@@ -44,6 +44,11 @@ class Settings(BaseSettings):
         description="Refresh token expiration time in days"
     )
     
+    upload_dir: str = Field(
+        default="./uploads",
+        description="Directory for uploaded files"
+    )
+    
     model_config = SettingsConfigDict(
         env_file=".env",
         env_file_encoding="utf-8",

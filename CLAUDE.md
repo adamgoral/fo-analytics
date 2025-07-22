@@ -109,7 +109,7 @@ flowchart TD
     Strategy --> Present[Present Approach]
 ```
 
-#### Act Mode
+#### Act/Edit Mode
 
 ```mermaid
 flowchart TD

@@ -17,12 +17,12 @@ class StrategyRepository(BaseRepository[Strategy]):
         super().__init__(Strategy, session)
 
     async def get_by_document(
-        self, document_id: UUID
+        self, document_id: int
     ) -> List[Strategy]:
         """Get all strategies extracted from a specific document."""
         result = await self.session.execute(
             select(Strategy)
-            .where(Strategy.document_id == document_id)
+            .where(Strategy.source_document_id == document_id)
         )
         return list(result.scalars().all())
 
@@ -32,7 +32,7 @@ class StrategyRepository(BaseRepository[Strategy]):
         """Get all strategies for a specific user."""
         result = await self.session.execute(
             select(Strategy)
-            .where(Strategy.user_id == user_id)
+            .where(Strategy.created_by_id == user_id)
             .offset(skip)
             .limit(limit)
         )
@@ -45,29 +45,17 @@ class StrategyRepository(BaseRepository[Strategy]):
         result = await self.session.execute(
             select(Strategy)
             .where(
-                Strategy.user_id == user_id,
-                Strategy.is_active == True
+                Strategy.created_by_id == user_id,
+                Strategy.status == "active"
             )
         )
         return list(result.scalars().all())
 
-    async def activate_strategy(
-        self, strategy_id: UUID
+    async def update_extraction_confidence(
+        self, strategy_id: int, extraction_confidence: float
     ) -> Optional[Strategy]:
-        """Activate a strategy."""
-        return await self.update(strategy_id, is_active=True)
-
-    async def deactivate_strategy(
-        self, strategy_id: UUID
-    ) -> Optional[Strategy]:
-        """Deactivate a strategy."""
-        return await self.update(strategy_id, is_active=False)
-
-    async def update_confidence_score(
-        self, strategy_id: UUID, confidence_score: float
-    ) -> Optional[Strategy]:
-        """Update strategy confidence score."""
+        """Update strategy extraction confidence score."""
         return await self.update(
             strategy_id, 
-            confidence_score=confidence_score
+            extraction_confidence=extraction_confidence
         )

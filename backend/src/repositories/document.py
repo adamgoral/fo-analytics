@@ -22,21 +22,23 @@ class DocumentRepository(BaseRepository[Document]):
         """Get all documents for a specific user."""
         result = await self.session.execute(
             select(Document)
-            .where(Document.user_id == user_id)
+            .where(Document.uploaded_by_id == user_id)
             .offset(skip)
             .limit(limit)
         )
         return list(result.scalars().all())
 
     async def get_by_status(
-        self, status: str, skip: int = 0, limit: int = 100
+        self, status: str, user_id: Optional[UUID] = None, skip: int = 0, limit: int = 100
     ) -> List[Document]:
         """Get documents by processing status."""
+        query = select(Document).where(Document.status == status)
+        
+        if user_id:
+            query = query.where(Document.uploaded_by_id == user_id)
+            
         result = await self.session.execute(
-            select(Document)
-            .where(Document.status == status)
-            .offset(skip)
-            .limit(limit)
+            query.offset(skip).limit(limit)
         )
         return list(result.scalars().all())
 
@@ -52,13 +54,13 @@ class DocumentRepository(BaseRepository[Document]):
         return list(result.scalars().all())
 
     async def update_status(
-        self, document_id: UUID, status: str
+        self, document_id: int, status: str
     ) -> Optional[Document]:
         """Update document processing status."""
         return await self.update(document_id, status=status)
 
     async def mark_as_processed(
-        self, document_id: UUID
+        self, document_id: int
     ) -> Optional[Document]:
         """Mark document as processed."""
-        return await self.update_status(document_id, "processed")
+        return await self.update_status(document_id, "completed")

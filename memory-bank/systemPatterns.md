@@ -92,6 +92,33 @@ The platform follows a microservices architecture pattern with clear service bou
       return await repo.get(user_id)
   ```
 
+### 6. Service Layer Pattern (✅ Implemented July 22, 2025)
+- **Purpose**: Encapsulate business logic
+- **Implementation**: Separate service classes for business operations
+- **Benefits**:
+  - API endpoints remain thin
+  - Business logic is testable
+  - Reusable across different interfaces
+- **Example**:
+  ```python
+  class AuthService:
+      async def register(self, email: str, password: str) -> User
+      async def login(self, email: str, password: str) -> TokenPair
+      async def refresh_token(self, refresh_token: str) -> TokenPair
+  ```
+
+### 7. Structured Logging Pattern (✅ Implemented July 22, 2025)
+- **Library**: structlog for JSON structured logs
+- **Features**:
+  - Environment-based formatting (JSON/colored)
+  - Request tracing with correlation IDs
+  - Performance monitoring built-in
+  - Sensitive data automatic censoring
+- **Integration**:
+  - Middleware for request/response logging
+  - Context propagation throughout request
+  - User context for audit trails
+
 ### 4. Domain-Driven Design (DDD)
 - **Bounded Contexts**:
   - Document Management
@@ -231,7 +258,7 @@ The platform follows a microservices architecture pattern with clear service bou
 4. **Bulkhead**: Isolate critical resources
 5. **Fallback**: Graceful degradation
 
-### Error Response Structure
+### Error Response Structure (✅ Standardized)
 ```python
 class ErrorResponse(BaseModel):
     error_id: UUID
@@ -242,31 +269,61 @@ class ErrorResponse(BaseModel):
     correlation_id: UUID
 ```
 
+### API Error Handling (✅ Implemented)
+- **Consistent Format**: All errors follow same structure
+- **HTTP Status Codes**: Proper codes for different errors
+- **Validation Errors**: Detailed field-level error messages
+- **Business Errors**: Clear messages for domain violations
+- **System Errors**: Generic messages with correlation IDs
+
 ## Monitoring Patterns
 
 ### Observability Stack
 - **Metrics**: Prometheus + Grafana
-- **Logging**: ELK Stack (Elasticsearch, Logstash, Kibana)
-- **Tracing**: OpenTelemetry + Jaeger
-- **Alerting**: PagerDuty integration
+- **Logging**: ✅ Structured JSON logs ready for ELK Stack
+- **Tracing**: OpenTelemetry + Jaeger (planned)
+- **Alerting**: PagerDuty integration (planned)
+
+### Implemented Logging (✅ July 22, 2025)
+- **Structured Format**: JSON logs with consistent schema
+- **Request Tracing**: Unique request IDs for correlation
+- **Performance Tracking**: Automatic slow request detection
+- **Security**: Sensitive data censoring (passwords, tokens, keys)
+- **Context Propagation**: User and request context throughout
+- **Environment Aware**: JSON for production, colored for development
 
 ### Key Metrics
 - **Business**: Strategies extracted/hour, backtests completed
 - **Technical**: API latency, error rates, queue depth
 - **Resource**: CPU, memory, disk usage
+- **Security**: Failed auth attempts, permission denials
 
 ## Deployment Patterns
 
 ### Container Orchestration
-- **Platform**: Kubernetes
+- **Platform**: Kubernetes (planned for production)
+- **Current**: Docker Compose for development (✅ Implemented)
 - **Patterns**:
   - Rolling updates
   - Blue-green deployments
   - Canary releases
   - Health checks and readiness probes
 
+### Development Environment (✅ Implemented)
+- **Docker Compose**: Multi-container orchestration
+- **Hot Reloading**: Both backend and frontend
+- **Health Checks**: All services monitored
+- **Networking**: Isolated network with service discovery
+- **Volumes**: Persistent data and code mounting
+
+### CI/CD Pipeline (✅ Implemented)
+- **GitHub Actions**: Automated workflows
+- **CI Pipeline**: Lint, test, security scan, build
+- **CD Pipeline**: Build images, push registry, deploy
+- **Security**: Trivy scanning, dependency checks
+
 ### Infrastructure as Code
-- **Tool**: Terraform
+- **Tool**: Terraform (planned for cloud deployment)
 - **Patterns**:
   - Modular configuration
   - Environment-specific variables
