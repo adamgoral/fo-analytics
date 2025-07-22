@@ -15,7 +15,8 @@
 - **Language**: Python 3.11+
 - **Framework**: FastAPI
 - **Package Manager**: uv (not pip/poetry)
-- **ORM**: SQLAlchemy 2.0+
+- **ORM**: SQLAlchemy 2.0+ with async support
+- **Data Access**: Repository pattern + Unit of Work ✅ Implemented
 - **Data Validation**: Pydantic v2
 - **Testing**: pytest + pytest-asyncio
 - **Code Quality**: Ruff (linting + formatting)
@@ -69,10 +70,19 @@ fo-analytics/
 │   │   ├── api/          # FastAPI routes
 │   │   ├── core/         # Core business logic
 │   │   ├── services/     # Service layer
-│   │   ├── models/       # SQLAlchemy models
+│   │   ├── models/       # SQLAlchemy models ✅
+│   │   ├── repositories/ # Repository pattern ✅ Implemented
+│   │   │   ├── base.py        # BaseRepository with generics
+│   │   │   ├── user.py        # UserRepository
+│   │   │   ├── document.py    # DocumentRepository
+│   │   │   ├── strategy.py    # StrategyRepository
+│   │   │   ├── backtest.py    # BacktestRepository
+│   │   │   └── unit_of_work.py # Transaction management
 │   │   ├── schemas/      # Pydantic schemas
 │   │   └── utils/        # Utilities
 │   ├── tests/
+│   │   └── unit/
+│   │       └── repositories/  # Repository tests ✅
 │   ├── pyproject.toml    # uv configuration
 │   ├── Dockerfile        # Production image
 │   └── Dockerfile.dev    # Development image
