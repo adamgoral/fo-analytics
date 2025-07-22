@@ -8,6 +8,11 @@
 - Use uv for package management
 - Use `uv run pytest` to run tests
 - Use pydantic for data classes
+- Use ruff for formatting
+
+## Development Tools
+
+- Use Tilt.dev for local development environment
 
 ## Frontend Development
 
