@@ -17,6 +17,8 @@
 - **Package Manager**: uv (not pip/poetry)
 - **ORM**: SQLAlchemy 2.0+ with async support
 - **Data Access**: Repository pattern + Unit of Work ✅ Implemented
+- **Authentication**: JWT with python-jose ✅ Implemented
+- **Password Hashing**: bcrypt via passlib ✅ Implemented
 - **Data Validation**: Pydantic v2
 - **Testing**: pytest + pytest-asyncio
 - **Code Quality**: Ruff (linting + formatting)
@@ -67,9 +69,19 @@
 fo-analytics/
 ├── backend/
 │   ├── src/
-│   │   ├── api/          # FastAPI routes
-│   │   ├── core/         # Core business logic
-│   │   ├── services/     # Service layer
+│   │   ├── api/          # FastAPI routes ✅
+│   │   │   ├── health.py       # Health check endpoints
+│   │   │   ├── auth.py         # Authentication endpoints ✅
+│   │   │   └── users.py        # User management endpoints
+│   │   ├── core/         # Core business logic ✅
+│   │   │   ├── config.py       # Application settings
+│   │   │   ├── database.py     # Database connection
+│   │   │   ├── security.py     # JWT and password handling ✅
+│   │   │   ├── auth.py         # Auth dependencies ✅
+│   │   │   └── dependencies.py # FastAPI dependencies
+│   │   ├── services/     # Service layer ✅
+│   │   │   ├── user_service.py # User business logic
+│   │   │   └── auth_service.py # Auth business logic ✅
 │   │   ├── models/       # SQLAlchemy models ✅
 │   │   ├── repositories/ # Repository pattern ✅ Implemented
 │   │   │   ├── base.py        # BaseRepository with generics
@@ -78,7 +90,9 @@ fo-analytics/
 │   │   │   ├── strategy.py    # StrategyRepository
 │   │   │   ├── backtest.py    # BacktestRepository
 │   │   │   └── unit_of_work.py # Transaction management
-│   │   ├── schemas/      # Pydantic schemas
+│   │   ├── schemas/      # Pydantic schemas ✅
+│   │   │   ├── __init__.py
+│   │   │   └── auth.py         # Auth request/response schemas
 │   │   └── utils/        # Utilities
 │   ├── tests/
 │   │   └── unit/
@@ -235,11 +249,14 @@ class APIResponse(BaseModel):
 
 ## Security Considerations
 
-### Authentication
-- JWT tokens with refresh mechanism
-- SAML 2.0 for enterprise SSO
-- API keys for service accounts
-- Session timeout: 8 hours
+### Authentication ✅ (JWT Implemented)
+- ✅ JWT tokens with refresh mechanism (30min access, 7 day refresh)
+- ✅ Role-based access control (admin, analyst, viewer)
+- ✅ Password hashing with bcrypt
+- ✅ Protected route middleware
+- ⏳ SAML 2.0 for enterprise SSO (planned)
+- ⏳ API keys for service accounts (planned)
+- Session timeout: 8 hours (configurable)
 
 ### API Security
 - Rate limiting: 100 req/min per user

@@ -183,13 +183,22 @@ The platform follows a microservices architecture pattern with clear service bou
 
 ## Security Patterns
 
-### Authentication & Authorization
+### Authentication & Authorization ✅ (JWT Implemented July 22, 2025)
 - **Pattern**: Token-based with SAML SSO
-- **Implementation**:
-  - JWT for API authentication
-  - SAML for enterprise SSO
-  - RBAC for authorization
-  - API key for service-to-service
+- **Implementation Status**:
+  - ✅ JWT for API authentication (implemented with python-jose)
+  - ✅ Access tokens (30min) and refresh tokens (7 days)
+  - ✅ RBAC for authorization (admin, analyst, viewer roles)
+  - ✅ Password hashing with bcrypt via passlib
+  - ✅ Authentication middleware for protected routes
+  - ⏳ SAML for enterprise SSO (planned)
+  - ⏳ API key for service-to-service (planned)
+- **API Endpoints**:
+  - POST /api/v1/auth/register - User registration
+  - POST /api/v1/auth/login - User login with token generation
+  - POST /api/v1/auth/refresh - Refresh access token
+  - POST /api/v1/auth/change-password - Change password
+  - GET /api/v1/auth/me - Get current user info
 
 ### Data Security
 - **Encryption at Rest**: AES-256 for sensitive data

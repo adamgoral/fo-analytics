@@ -85,15 +85,21 @@
     - Dependency injection system for FastAPI
     - Example service layer and API endpoints
     - Comprehensive documentation in repositories/README.md
-  - 🔄 Authentication service (JWT + SSO preparation) - In Progress
+  - ✅ Authentication service (JWT + SSO preparation) - Completed July 22
+    - JWT-based authentication with access/refresh tokens
+    - User registration and login API endpoints
+    - Authentication middleware for protected routes
+    - RBAC foundation with admin, analyst, viewer roles
+    - Password hashing with bcrypt
+    - Token refresh and password change functionality
   - 🔄 Base API structure with proper patterns - In Progress
   - ⏳ Logging and monitoring setup - Not Started
 
 ### What's Not Started
 - **Cloud Infrastructure**: No AWS/Kubernetes resources provisioned
 - **Business Logic**: No document processing or AI integration
-- **Authentication Implementation**: JWT/SSO code not written
-- **API Endpoints**: Beyond health checks, no business endpoints
+- **SSO Integration**: SAML SSO not yet implemented (JWT complete)
+- **API Endpoints**: Need more business endpoints beyond auth
 - **Frontend Pages**: No actual UI components or pages built
 - **Monitoring**: Prometheus/Grafana stack not configured
 
@@ -129,6 +135,12 @@ None accumulated yet - clean slate for implementation
    - Unit of Work for transaction boundaries (data consistency)
    - Async-first approach (performance at scale)
    - Type-safe generics implementation (catch errors early)
+
+5. **Authentication Architecture** (July 22, 2025)
+   - JWT tokens over session-based auth (stateless, scalable)
+   - Separate access/refresh tokens (security best practice)
+   - Role-based access control built-in (enterprise requirement)
+   - Bcrypt for password hashing (industry standard)
 
 2. **Architecture Decisions**
    - Microservices over monolith (scalability requirements)
@@ -171,6 +183,8 @@ None accumulated yet - clean slate for implementation
 4. **Observability First**: Monitoring planned before implementation
 5. **Repository Pattern**: Clean separation of data access from business logic
 6. **Async-First Development**: All database operations are async for scalability
+7. **JWT Authentication**: Stateless auth for microservices architecture
+8. **Service Layer Pattern**: Business logic separated from API endpoints
 
 ## Risk Register
 
@@ -206,13 +220,13 @@ None accumulated yet - clean slate for implementation
 ### Sprint 1 Status (July 2025)
 1. [✓] Implement Alembic migrations and SQLAlchemy models - COMPLETED
 2. [✓] Implement repository pattern for data access - COMPLETED (July 22)
-3. [ ] Create authentication service with JWT - IN PROGRESS (Next)
-4. [ ] Build base API structure (routers, middleware)
+3. [✓] Create authentication service with JWT - COMPLETED (July 22)
+4. [ ] Build base API structure (routers, middleware) - IN PROGRESS (Next)
 5. [ ] Set up logging with proper formatting
 6. [ ] Create first business endpoint (document upload)
 7. [ ] Build basic frontend layout and routing
 
-**Sprint Progress: 2 of 7 tasks completed (28%)**
+**Sprint Progress: 3 of 7 tasks completed (43%)**
 
 ### Success Criteria
 - Local development environment running

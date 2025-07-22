@@ -29,6 +29,21 @@ class Settings(BaseSettings):
         description="Secret key for JWT tokens"
     )
     
+    algorithm: str = Field(
+        default="HS256",
+        description="JWT signing algorithm"
+    )
+    
+    access_token_expire_minutes: int = Field(
+        default=30,
+        description="Access token expiration time in minutes"
+    )
+    
+    refresh_token_expire_days: int = Field(
+        default=7,
+        description="Refresh token expiration time in days"
+    )
+    
     model_config = SettingsConfigDict(
         env_file=".env",
         env_file_encoding="utf-8",
