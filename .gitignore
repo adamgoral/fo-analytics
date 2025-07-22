@@ -93,3 +93,16 @@ frontend/.vite/
 *.key
 *.cert
 secrets/
+# Docker
+.env
+*.env.local
+*.env.*.local
+docker-compose.override.yml
+
+# Docker volumes (if stored locally)
+postgres-data/
+redis-data/
+rabbitmq-data/
+minio-data/
+elasticsearch-data/
+pgadmin-data/

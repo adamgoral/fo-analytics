@@ -43,6 +43,7 @@ The platform follows a microservices architecture pattern with clear service bou
   - Strategy extraction workflow
   - Backtest job orchestration
 - **Benefits**: Loose coupling, scalability, fault tolerance
+- **Implementation Status**: ✅ RabbitMQ configured in Docker, ready for use
 
 ### 2. API Gateway Pattern
 - **Implementation**: Kong or Nginx

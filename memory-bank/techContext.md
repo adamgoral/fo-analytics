@@ -35,11 +35,12 @@
 - **Object Storage**: AWS S3 or MinIO
 
 ### Infrastructure
-- **Container**: Docker + Docker Compose
-- **Orchestration**: Kubernetes (EKS/GKE)
-- **Cloud Provider**: AWS (primary), Azure/GCP (multi-cloud)
-- **IaC**: Terraform
-- **CI/CD**: GitHub Actions
+- **Container**: Docker + Docker Compose ✅ Implemented
+- **Orchestration**: Kubernetes (EKS/GKE) - planned
+- **Cloud Provider**: AWS (primary), Azure/GCP (multi-cloud) - planned
+- **IaC**: Terraform - planned
+- **CI/CD**: GitHub Actions ✅ Implemented
+- **Container Registry**: GitHub Container Registry (ghcr.io) ✅ Configured
 
 ### Monitoring & Observability
 - **Metrics**: Prometheus + Grafana
@@ -73,7 +74,8 @@ fo-analytics/
 │   │   └── utils/        # Utilities
 │   ├── tests/
 │   ├── pyproject.toml    # uv configuration
-│   └── Dockerfile
+│   ├── Dockerfile        # Production image
+│   └── Dockerfile.dev    # Development image
 ├── frontend/
 │   ├── src/
 │   │   ├── components/   # React components
@@ -83,10 +85,22 @@ fo-analytics/
 │   │   ├── store/        # Redux store
 │   │   └── utils/        # Utilities
 │   ├── package.json
-│   └── Dockerfile
-├── docker-compose.yml
+│   ├── Dockerfile        # Production image
+│   ├── Dockerfile.dev    # Development image
+│   └── nginx.conf       # Nginx configuration
+├── docker/
+│   └── setup.md          # Docker setup guide ✅
+├── docker-compose.yml    # Local development ✅
+├── Makefile             # Development commands ✅
+├── .env.example         # Environment template ✅
 └── .github/
-    └── workflows/        # CI/CD pipelines
+    ├── workflows/        # CI/CD pipelines ✅
+    │   ├── ci.yml        # Continuous Integration ✅
+    │   └── cd.yml        # Continuous Deployment ✅
+    ├── dependabot.yml    # Dependency updates ✅
+    ├── CODEOWNERS        # Review assignments ✅
+    ├── SECURITY.md       # Security policy ✅
+    └── pull_request_template.md  # PR template ✅
 ```
 
 ## Key Dependencies
@@ -283,14 +297,26 @@ RETRY_DELAY = 1.0  # Exponential backoff
 
 ## Deployment Pipeline
 
-### CI/CD Workflow
-1. Code push triggers GitHub Actions
-2. Run linting and type checking
-3. Execute test suite
-4. Build Docker images
-5. Push to registry
-6. Deploy to staging
-7. Run smoke tests
-8. Manual approval for production
-9. Blue-green deployment
-10. Post-deployment monitoring
+### CI/CD Workflow (Implemented)
+1. ✅ Code push triggers GitHub Actions
+2. ✅ Run linting and type checking (ruff, mypy, ESLint)
+3. ✅ Execute test suite with coverage
+4. ✅ Build Docker images
+5. ✅ Security scanning with Trivy
+6. ✅ Push to GitHub Container Registry
+7. 🔄 Deploy to staging (configuration needed)
+8. 🔄 Run smoke tests (tests to be written)
+9. 🔄 Manual approval for production
+10. 🔄 Blue-green deployment (Kubernetes config needed)
+11. 🔄 Post-deployment monitoring (Prometheus setup needed)
+
+### Docker Services (Configured)
+- **PostgreSQL 16**: Primary database on port 5432 ✅
+- **Redis 7**: Caching and session storage on port 6379 ✅
+- **RabbitMQ 3.12**: Message broker on ports 5672/15672 ✅
+- **MinIO**: S3-compatible storage on ports 9000/9001 ✅
+- **pgAdmin**: Database management UI on port 5050 (optional) ✅
+- **Backend**: FastAPI on port 8000 with hot-reloading ✅
+- **Frontend**: Vite dev server on port 5173 with HMR ✅
+
+All services include health checks and are connected via custom bridge network.

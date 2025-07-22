@@ -1,0 +1,29 @@
+# Default owners for everything in the repo
+* @fo-analytics/engineering
+
+# Backend code owners
+/backend/ @fo-analytics/backend
+/backend/src/api/ @fo-analytics/api-team
+/backend/src/core/ @fo-analytics/platform-team
+/backend/tests/ @fo-analytics/qa-team
+
+# Frontend code owners
+/frontend/ @fo-analytics/frontend
+/frontend/src/components/ @fo-analytics/ui-team
+/frontend/src/store/ @fo-analytics/frontend
+
+# Infrastructure and DevOps
+/.github/ @fo-analytics/devops
+/docker/ @fo-analytics/devops
+/k8s/ @fo-analytics/devops
+docker-compose.yml @fo-analytics/devops
+Dockerfile* @fo-analytics/devops
+
+# Documentation
+*.md @fo-analytics/documentation
+/docs/ @fo-analytics/documentation
+
+# Security-sensitive files
+.env* @fo-analytics/security
+**/auth/ @fo-analytics/security
+**/security/ @fo-analytics/security
