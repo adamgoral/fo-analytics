@@ -3,8 +3,8 @@
 from typing import Optional
 from uuid import UUID
 
-from src.repositories.unit_of_work import UnitOfWork
-from src.repositories.user import UserRepository
+from repositories.unit_of_work import UnitOfWork
+from repositories.user import UserRepository
 
 
 class UserService:

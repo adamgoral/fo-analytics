@@ -22,8 +22,8 @@ if config.config_file_name is not None:
     fileConfig(config.config_file_name)
 
 # Import our models and configuration
-from src.models import Base
-from src.core.config import settings
+from models import Base
+from core.config import settings
 
 # Set target metadata for autogenerate support
 target_metadata = Base.metadata

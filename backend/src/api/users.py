@@ -6,8 +6,8 @@ from uuid import UUID
 from fastapi import APIRouter, Depends, HTTPException, status
 from pydantic import BaseModel, EmailStr
 
-from src.core.dependencies import get_user_repository
-from src.repositories.user import UserRepository
+from core.dependencies import get_user_repository
+from repositories.user import UserRepository
 
 router = APIRouter(prefix="/users", tags=["users"])
 

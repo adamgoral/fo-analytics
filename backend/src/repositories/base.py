@@ -6,7 +6,7 @@ from uuid import UUID
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from src.models.base import Base
+from models.base import Base
 
 ModelType = TypeVar("ModelType", bound=Base)
 

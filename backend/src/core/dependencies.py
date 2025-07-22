@@ -5,11 +5,11 @@ from typing import AsyncGenerator
 from fastapi import Depends
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from src.core.database import get_db
-from src.repositories.backtest import BacktestRepository
-from src.repositories.document import DocumentRepository
-from src.repositories.strategy import StrategyRepository
-from src.repositories.user import UserRepository
+from core.database import get_db
+from repositories.backtest import BacktestRepository
+from repositories.document import DocumentRepository
+from repositories.strategy import StrategyRepository
+from repositories.user import UserRepository
 
 
 async def get_user_repository(

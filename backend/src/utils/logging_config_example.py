@@ -5,7 +5,7 @@ This file demonstrates how to use the logging utilities in various
 parts of the application.
 """
 
-from src.utils.logging import logger, LoggerAdapter, log_endpoint_performance
+from utils.logging import logger, LoggerAdapter, log_endpoint_performance
 
 
 # Basic logging examples
@@ -137,7 +137,7 @@ def exception_logging_example():
 def correlation_example():
     """Demonstrate correlation ID usage for distributed tracing."""
     
-    from src.utils.logging import set_correlation_id
+    from utils.logging import set_correlation_id
     
     # Set correlation ID for a distributed operation
     correlation_id = "corr_789abc"

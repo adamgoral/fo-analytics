@@ -6,8 +6,8 @@ from uuid import UUID
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from src.models.strategy import Strategy
-from src.repositories.base import BaseRepository
+from models.strategy import Strategy
+from repositories.base import BaseRepository
 
 
 class StrategyRepository(BaseRepository[Strategy]):

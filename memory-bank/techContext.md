@@ -15,12 +15,13 @@
 - **Language**: Python 3.11+
 - **Framework**: FastAPI
 - **Package Manager**: uv (not pip/poetry)
+- **Package Structure**: Clean imports without `src.` prefix ✅ Configured
 - **ORM**: SQLAlchemy 2.0+ with async support
 - **Data Access**: Repository pattern + Unit of Work ✅ Implemented
 - **Authentication**: JWT with python-jose ✅ Implemented
 - **Password Hashing**: bcrypt via passlib ✅ Implemented
 - **Data Validation**: Pydantic v2
-- **Testing**: pytest + pytest-asyncio
+- **Testing**: pytest + pytest-asyncio with pythonpath configuration ✅
 - **Code Quality**: Ruff (linting + formatting)
 
 ### AI/ML Stack
@@ -159,6 +160,17 @@ dev = [
     "mypy>=1.8.0",
     "pre-commit>=3.6.0",
 ]
+
+[tool.setuptools]
+packages = ["src"]
+
+[tool.setuptools.package-dir]
+"" = "."
+
+[tool.pytest.ini_options]
+pythonpath = ["src"]
+testpaths = ["tests"]
+asyncio_mode = "auto"
 ```
 
 ### Frontend Dependencies

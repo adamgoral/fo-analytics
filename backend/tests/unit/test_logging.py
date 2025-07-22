@@ -13,7 +13,7 @@ import structlog
 from fastapi import FastAPI, Request
 from fastapi.testclient import TestClient
 
-from src.utils.logging import (
+from utils.logging import (
     LogLevel,
     LoggerAdapter,
     PerformanceLogger,
@@ -27,7 +27,7 @@ from src.utils.logging import (
     set_request_id,
     set_user_context,
 )
-from src.middleware.logging import (
+from middleware.logging import (
     RequestLoggingMiddleware,
     PerformanceLoggingMiddleware,
     create_request_id_middleware,
@@ -48,7 +48,7 @@ class TestLoggingConfiguration:
     
     def test_add_app_context(self):
         """Test application context addition."""
-        with patch("src.utils.logging.settings") as mock_settings:
+        with patch("utils.logging.settings") as mock_settings:
             mock_settings.app_name = "Test App"
             mock_settings.app_version = "1.0.0"
             mock_settings.debug = True
@@ -172,7 +172,7 @@ class TestRequestLoggingMiddleware:
         """Test that requests are logged properly."""
         client = TestClient(app)
         
-        with patch("src.middleware.logging.logger") as mock_logger:
+        with patch("middleware.logging.logger") as mock_logger:
             response = client.get("/test")
             
             assert response.status_code == 200
@@ -185,7 +185,7 @@ class TestRequestLoggingMiddleware:
         """Test that configured paths are skipped."""
         client = TestClient(app)
         
-        with patch("src.middleware.logging.logger") as mock_logger:
+        with patch("middleware.logging.logger") as mock_logger:
             response = client.get("/health")
             
             assert response.status_code == 200
@@ -196,7 +196,7 @@ class TestRequestLoggingMiddleware:
         """Test that errors are logged properly."""
         client = TestClient(app)
         
-        with patch("src.middleware.logging.logger") as mock_logger:
+        with patch("middleware.logging.logger") as mock_logger:
             with pytest.raises(ValueError):
                 response = client.get("/error")
             
@@ -240,7 +240,7 @@ class TestPerformanceLoggingMiddleware:
         """Test that slow requests are logged."""
         client = TestClient(app)
         
-        with patch("src.middleware.logging.logger") as mock_logger:
+        with patch("middleware.logging.logger") as mock_logger:
             response = client.get("/slow")
             
             # Should log slow request warning
@@ -256,7 +256,7 @@ class TestLoggingIntegration:
         """Test JSON output format in production mode."""
         output = StringIO()
         
-        with patch("src.utils.logging.settings.debug", False):
+        with patch("utils.logging.settings.debug", False):
             with patch("sys.stdout", output):
                 configure_logging()
                 test_logger = structlog.get_logger()
@@ -286,7 +286,7 @@ class TestRequestIdMiddleware:
         async def call_next(req):
             return Mock(headers={})
         
-        with patch("src.middleware.logging.set_request_id") as mock_set_id:
+        with patch("middleware.logging.set_request_id") as mock_set_id:
             response = await middleware(request, call_next)
             
             # Should set request ID

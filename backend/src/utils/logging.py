@@ -18,7 +18,7 @@ from structlog.contextvars import bind_contextvars, clear_contextvars, merge_con
 from structlog.processors import CallsiteParameter, CallsiteParameterAdder
 from structlog.types import Processor
 
-from src.core.config import settings
+from core.config import settings
 
 
 class LogLevel(StrEnum):

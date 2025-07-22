@@ -1,6 +1,6 @@
 from fastapi import APIRouter
 
-from src.utils.logging import logger, LoggerAdapter
+from utils.logging import logger, LoggerAdapter
 
 router = APIRouter(tags=["health"])
 

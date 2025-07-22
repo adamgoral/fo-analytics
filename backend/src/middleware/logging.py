@@ -14,7 +14,7 @@ from fastapi import Request, Response
 from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.types import ASGIApp
 
-from src.utils.logging import (
+from utils.logging import (
     logger,
     set_request_id,
     set_user_context,

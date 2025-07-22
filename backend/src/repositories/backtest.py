@@ -6,8 +6,8 @@ from uuid import UUID
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from src.models.backtest import Backtest
-from src.repositories.base import BaseRepository
+from models.backtest import Backtest
+from repositories.base import BaseRepository
 
 
 class BacktestRepository(BaseRepository[Backtest]):

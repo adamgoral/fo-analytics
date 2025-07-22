@@ -3,8 +3,8 @@
 import pytest
 from uuid import uuid4
 
-from src.models.user import User
-from src.repositories.user import UserRepository
+from models.user import User
+from repositories.user import UserRepository
 
 
 @pytest.mark.asyncio
