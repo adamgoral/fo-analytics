@@ -70,6 +70,8 @@ logs/
 
 # Docker
 .docker/
+docker-compose.override.yml
+.dockerignore
 
 # Temporary files
 *.tmp
