@@ -37,7 +37,6 @@ The project has moved from planning to active implementation. Basic project stru
   - Dependabot for automated dependency updates
 
 ### What Doesn't Exist Yet
-- Database migrations with Alembic (SQLAlchemy models not created yet)
 - Authentication implementation (JWT/SSO)
 - Cloud deployment configuration (Kubernetes/Terraform)
 - Actual business logic and features
@@ -57,11 +56,12 @@ The project has moved from planning to active implementation. Basic project stru
    - ✅ Set up CI/CD with GitHub Actions
 
 ### Next Sprint Focus (Sprint 1)
-1. **Database & Models**
-   - Design and implement SQLAlchemy models (User, Document, Strategy, Backtest)
-   - Set up Alembic for database migrations
-   - Create repository pattern for data access
-   - Add database connection pooling
+1. **Database & Models** ✅ (Completed July 22, 2025)
+   - ✅ Implemented SQLAlchemy models (User, Document, Strategy, Backtest)
+   - ✅ Set up Alembic for database migrations
+   - ✅ Created async database connection with proper configuration
+   - Next: Create repository pattern for data access
+   - Next: Add database connection pooling optimization
 
 2. **Authentication & Security**
    - Implement JWT-based authentication
@@ -113,10 +113,17 @@ None - implementation is progressing smoothly
 - Initialized backend with FastAPI and all core dependencies
 - Initialized frontend with React/TypeScript/Vite
 - Both servers can run independently (backend on :8000, frontend on :5173)
-- **NEW**: Complete Docker development environment with all services
-- **NEW**: Database schema designed and implemented
-- **NEW**: CI/CD pipelines configured with GitHub Actions
-- **NEW**: Development tooling (Makefile, environment configuration)
+- Complete Docker development environment with all services
+- Database schema designed and implemented
+- CI/CD pipelines configured with GitHub Actions
+- Development tooling (Makefile, environment configuration)
+- **NEW**: SQLAlchemy models created for all core entities:
+  - User model with role-based access control (Admin, Analyst, Viewer)
+  - Document model with processing status tracking
+  - Strategy model with extraction metadata and performance metrics
+  - Backtest model with comprehensive result storage
+- **NEW**: Alembic configured for async database migrations
+- **NEW**: Database connection module with async session management
 
 ## Important Patterns and Preferences
 

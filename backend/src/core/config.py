@@ -10,7 +10,7 @@ class Settings(BaseSettings):
     api_prefix: str = "/api/v1"
     
     database_url: str = Field(
-        default="postgresql+asyncpg://postgres:postgres@localhost:5432/fo_analytics",
+        default="postgresql+asyncpg://fo_user:fo_password@localhost:5432/fo_analytics",
         description="PostgreSQL connection string"
     )
     
