@@ -171,13 +171,37 @@ The platform follows a microservices architecture pattern with clear service bou
   Download → Verify ownership → Generate URL/Stream → Return content
   ```
 
-### AI Service
+### AI Service (✅ LLM Provider Integration Implemented July 23, 2025)
 - **Primary Responsibility**: LLM integration and strategy extraction
+- **Implemented Components**:
+  - ✅ Provider pattern with abstract base class
+  - ✅ AnthropicProvider for Claude API integration
+  - ✅ Factory pattern for dynamic provider selection
+  - ✅ LLMService as unified interface
+  - ✅ Retry logic with exponential backoff
+  - ✅ Custom exception hierarchy
+  - ✅ JSON mode for structured output
+  - ✅ Comprehensive test coverage
 - **Key Patterns**:
-  - Adapter pattern for LLM providers
-  - Circuit breaker for API resilience
-  - Retry pattern with exponential backoff
-  - Template method for extraction workflows
+  - **Adapter Pattern**: Each LLM provider (Anthropic, OpenAI, Gemini) implements common interface
+  - **Factory Pattern**: `LLMProviderFactory.create()` selects provider based on config
+  - **Strategy Pattern**: Different extraction strategies per document type
+  - **Circuit Breaker**: Built into retry logic for API resilience
+  - **Template Method**: Base extraction workflow with provider-specific implementations
+- **Architecture**:
+  ```python
+  # Provider interface
+  class BaseLLMProvider(ABC):
+      async def extract_strategies(content: str) -> List[Strategy]
+      async def analyze_document(content: str) -> DocumentAnalysis
+  
+  # Factory pattern
+  provider = LLMProviderFactory.create("anthropic")
+  
+  # Service layer
+  llm_service = LLMService(provider)
+  strategies = await llm_service.extract_strategies(document_text)
+  ```
 
 ### Backtesting Service
 - **Primary Responsibility**: Strategy execution and performance analysis
@@ -216,18 +240,41 @@ The platform follows a microservices architecture pattern with clear service bou
 
 ## Integration Patterns
 
-### LLM Integration
-- **Pattern**: Adapter with Circuit Breaker
-- **Implementation**:
+### LLM Integration (✅ Implemented July 23, 2025)
+- **Pattern**: Provider Pattern with Factory
+- **Implementation Status**: Complete with Anthropic Claude integration
+- **Architecture**:
   ```python
-  class LLMAdapter(ABC):
+  # Base provider interface
+  class BaseLLMProvider(ABC):
       @abstractmethod
-      async def extract_strategies(self, content: str) -> List[Strategy]
+      async def extract_strategies(self, content: str, options: Optional[Dict] = None) -> Dict[str, Any]
+      
+      @abstractmethod
+      async def analyze_document(self, content: str, analysis_type: str) -> Dict[str, Any]
   
-  class ClaudeAdapter(LLMAdapter):
-      @circuit_breaker(failure_threshold=5)
-      async def extract_strategies(self, content: str) -> List[Strategy]
+  # Anthropic implementation
+  class AnthropicProvider(BaseLLMProvider):
+      def __init__(self, api_key: str, model: str = "claude-3-5-sonnet-20241022"):
+          self.client = AsyncAnthropic(api_key=api_key)
+          self.model = model
+      
+      @retry(stop=stop_after_attempt(3), wait=wait_exponential(multiplier=1, min=4, max=10))
+      async def extract_strategies(self, content: str, options: Optional[Dict] = None) -> Dict[str, Any]:
+          # Implementation with structured JSON output
+  
+  # Factory pattern
+  class LLMProviderFactory:
+      @staticmethod
+      def create(provider_type: str = "anthropic") -> BaseLLMProvider:
+          if provider_type == "anthropic":
+              return AnthropicProvider(api_key=settings.ANTHROPIC_API_KEY)
+          # Future: OpenAI, Gemini providers
   ```
+- **Error Handling**:
+  - Custom exceptions: LLMProviderError, RateLimitError, InvalidResponseError
+  - Retry logic with exponential backoff
+  - Graceful fallbacks for API failures
 
 ### External API Integration
 - **Pattern**: Gateway with Retry

@@ -25,10 +25,15 @@
 - **Code Quality**: Ruff (linting + formatting)
 
 ### AI/ML Stack
-- **LLM Provider**: Anthropic Claude API
+- **LLM Provider**: Anthropic Claude API ✅ Implemented
+  - Provider pattern with AnthropicProvider class
+  - Claude 3.5 Sonnet model integration
+  - Structured JSON output for strategy extraction
+  - Retry logic with exponential backoff
 - **Document Processing**: LlamaIndex with PyMuPDFReader ✅ Implemented
 - **PDF Parsing**: PyMuPDF (superior to PyPDF2) ✅ Implemented
 - **Text Extraction**: Support for PDF, TXT, Markdown ✅ Implemented
+- **HTTP Client**: httpx for async API calls ✅ Implemented
 - **Embeddings**: OpenAI Ada or Sentence Transformers - planned
 - **Vector Store**: Pinecone or Weaviate - planned
 - **ML Framework**: scikit-learn for metrics - planned
@@ -149,7 +154,17 @@ fo-analytics/
 │   │   │   └── dependencies.py # FastAPI dependencies
 │   │   ├── services/     # Service layer ✅
 │   │   │   ├── user_service.py # User business logic
-│   │   │   └── auth_service.py # Auth business logic ✅
+│   │   │   ├── auth_service.py # Auth business logic ✅
+│   │   │   ├── document_parser.py # Document parsing ✅
+│   │   │   ├── storage.py # MinIO/S3 storage ✅
+│   │   │   └── llm/       # LLM integration ✅
+│   │   │       ├── base.py        # Abstract provider
+│   │   │       ├── factory.py     # Provider factory
+│   │   │       ├── service.py     # LLM service
+│   │   │       └── providers/     # Provider implementations
+│   │   │           ├── anthropic.py # Claude API ✅
+│   │   │           ├── openai.py    # OpenAI (skeleton)
+│   │   │           └── gemini.py    # Google (skeleton)
 │   │   ├── models/       # SQLAlchemy models ✅
 │   │   ├── repositories/ # Repository pattern ✅ Implemented
 │   │   │   ├── base.py        # BaseRepository with generics
@@ -209,8 +224,8 @@ dependencies = [
     "asyncpg>=0.29.0",
     "redis>=5.0.0",
     "aio-pika>=9.3.0",      # RabbitMQ client
-    "httpx>=0.25.0",         # Async HTTP client
-    "anthropic>=0.8.0",      # Claude API
+    "httpx>=0.25.0",         # Async HTTP client ✅
+    "anthropic>=0.39.0",     # Claude API ✅
     "boto3>=1.34.0",         # AWS SDK
     "aioboto3>=12.0.0",      # Async S3 client ✅
     "python-multipart>=0.0.6",
@@ -222,6 +237,7 @@ dependencies = [
     "llama-index-readers-file>=0.1.0",  # File readers ✅
     "pymupdf>=1.23.0",       # PDF parsing ✅
     "aiofiles>=23.0.0",      # Async file operations ✅
+    "tenacity>=8.2.0",       # Retry logic ✅
 ]
 
 [project.optional-dependencies]
@@ -375,16 +391,22 @@ class APIResponse(BaseModel):
 
 ## Integration Patterns
 
-### LLM Integration
+### LLM Integration (✅ Implemented)
 ```python
 # Anthropic Claude configuration
-CLAUDE_MODEL = "claude-3-opus-20240229"
+CLAUDE_MODEL = "claude-3-5-sonnet-20241022"  # Latest model
 MAX_TOKENS = 4096
 TEMPERATURE = 0.2  # Lower for consistency
 
-# Retry configuration
+# Retry configuration with tenacity
 MAX_RETRIES = 3
-RETRY_DELAY = 1.0  # Exponential backoff
+RETRY_MIN_WAIT = 4  # seconds
+RETRY_MAX_WAIT = 10  # seconds
+RETRY_MULTIPLIER = 1  # exponential backoff
+
+# Provider configuration
+LLM_PROVIDER = "anthropic"  # Options: anthropic, openai, gemini
+ANTHROPIC_API_KEY = os.getenv("ANTHROPIC_API_KEY")
 ```
 
 ### External Services
@@ -447,9 +469,19 @@ All services include health checks and are connected via custom bridge network.
 - **PyMuPDFReader**: Superior to PDFReader for complex layouts and tables
 - **Storage Integration**: Download from S3 to temp file for processing
 
+### LLM Provider Integration (July 23, 2025)
+- **Provider Pattern**: Abstract base class ensures consistent interface across providers
+- **Factory Pattern**: Dynamic provider selection based on configuration
+- **Error Handling**: Custom exceptions for different failure modes (rate limits, invalid responses)
+- **Retry Logic**: Use tenacity library for configurable retry with exponential backoff
+- **Async Implementation**: All LLM calls use async/await for non-blocking operations
+- **Structured Output**: Use JSON mode for consistent strategy extraction format
+- **Model Selection**: Claude 3.5 Sonnet provides best performance for financial analysis
+
 ### Testing Patterns
 - **Async Tests**: Use `pytest-asyncio` with proper fixtures
 - **Mock Storage**: Create mock S3 responses for unit tests
+- **Mock LLM Responses**: Create realistic API response mocks for provider tests
 - **PDF Generation**: Use `reportlab` for creating test PDFs
 - **Import Paths**: Configure pytest with correct PYTHONPATH
 
@@ -458,3 +490,4 @@ All services include health checks and are connected via custom bridge network.
 - **Content Retrieval**: Support page-specific access for large documents
 - **Error Handling**: Return processing errors in document status
 - **Streaming**: Use StreamingResponse for large file downloads
+- **LLM Integration**: Decouple LLM service from specific providers for flexibility

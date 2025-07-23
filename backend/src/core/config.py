@@ -1,5 +1,6 @@
 from pydantic_settings import BaseSettings, SettingsConfigDict
 from pydantic import Field
+from typing import Optional
 
 
 class Settings(BaseSettings):
@@ -88,6 +89,52 @@ class Settings(BaseSettings):
     allowed_file_extensions: list[str] = Field(
         default=[".pdf", ".txt", ".doc", ".docx"],
         description="Allowed file extensions for upload"
+    )
+    
+    # LLM Provider Configuration
+    llm_provider: str = Field(
+        default="anthropic",
+        description="LLM provider to use (anthropic, openai, gemini)"
+    )
+    
+    llm_model: str = Field(
+        default="claude-3-5-sonnet-20241022",
+        description="Model to use for the selected provider"
+    )
+    
+    llm_temperature: float = Field(
+        default=0.7,
+        ge=0.0,
+        le=2.0,
+        description="Temperature for LLM generation"
+    )
+    
+    llm_max_tokens: int = Field(
+        default=4096,
+        gt=0,
+        description="Maximum tokens for LLM generation"
+    )
+    
+    llm_timeout: int = Field(
+        default=60,
+        gt=0,
+        description="Timeout in seconds for LLM API calls"
+    )
+    
+    # API Keys for LLM providers (use environment variables)
+    anthropic_api_key: Optional[str] = Field(
+        default=None,
+        description="Anthropic API key"
+    )
+    
+    openai_api_key: Optional[str] = Field(
+        default=None,
+        description="OpenAI API key"
+    )
+    
+    google_api_key: Optional[str] = Field(
+        default=None,
+        description="Google API key for Gemini"
     )
     
     model_config = SettingsConfigDict(
