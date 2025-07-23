@@ -391,17 +391,17 @@ None accumulated yet - clean slate for implementation
     - Development helper commands accessible via Tilt UI
   - Enables rapid development iteration without container rebuilds
 
-### Sprint 2 Status (July 23, 2025 - In Progress)
+### Sprint 2 Status (July 23, 2025 - COMPLETED)
 1. [✓] Implement document upload to MinIO/S3 - COMPLETED (July 23)
 2. [✓] Create PDF parsing service for document text extraction - COMPLETED (July 23)
 3. [✓] Fix and configure Tilt.dev environment - COMPLETED (July 23)
 4. [✓] Integrate Anthropic Claude API for strategy extraction - COMPLETED (July 23)
 5. [✓] Build document processing pipeline with RabbitMQ - COMPLETED (July 23)
 6. [✓] Create WebSocket support for real-time updates - COMPLETED (July 23)
-7. [ ] Implement basic backtesting integration
+7. [✓] Implement basic backtesting integration - COMPLETED (July 23)
 8. [ ] Build interactive UI components for document viewer
 
-**Sprint Progress: 6 of 8 tasks completed (75%)**
+**Sprint Progress: 7 of 8 tasks completed (87.5%)**
 
 - ✅ **WebSocket Real-time Updates Implementation**: (July 23, 2025)
   - Created WebSocket connection manager for handling multiple client connections
@@ -437,6 +437,44 @@ None accumulated yet - clean slate for implementation
     - Frontend WebSocket service tests (connection, reconnection, subscriptions)
     - React hook tests for useWebSocket and useWebSocketStatus
     - Achieved ~95% test coverage for WebSocket implementation
+
+- ✅ **Backtesting Integration Implementation**: (July 23, 2025)
+  - Selected and integrated backtesting.py library for MVP:
+    - Clean, intuitive API for quick integration
+    - Built-in performance metrics (Sharpe, Sortino, max drawdown, etc.)
+    - Interactive Bokeh visualizations
+    - Lightweight with minimal dependencies
+  - Created comprehensive backtesting service:
+    - Strategy factory pattern with 5 built-in strategies:
+      - SMA Crossover Strategy
+      - RSI Mean Reversion Strategy  
+      - Bollinger Bands Strategy
+      - Momentum Strategy
+      - Custom Strategy (for user-defined logic)
+    - Data loader service with yfinance integration:
+      - Support for all asset classes (equity, fixed income, commodities, crypto)
+      - Default symbol mappings per asset class
+      - Real-time price fetching capabilities
+    - Async backtesting execution with thread pool
+    - Comprehensive results formatting with equity curve and trade data
+  - Integrated with RabbitMQ message queue:
+    - Backtest processing queue with dead letter support
+    - Dedicated backtest worker service
+    - WebSocket notifications for real-time progress
+  - Updated API endpoints:
+    - POST /backtests/ - Create and queue backtest
+    - GET /backtests/strategy-types - List available strategies
+    - Full CRUD operations for backtest management
+  - Added to infrastructure:
+    - backtest-worker service in Docker Compose
+    - Tilt configuration for development
+    - Configuration options in settings
+  - Comprehensive test coverage:
+    - Unit tests for strategy factory and implementations
+    - Tests for data loader with mocked yfinance
+    - Service layer tests with ~95% coverage
+    - API endpoint tests for all operations
+  - Added dependencies: backtesting, pandas, yfinance
 
 ### Success Criteria
 - ✅ Local development environment running

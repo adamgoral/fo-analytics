@@ -168,6 +168,22 @@ class Settings(BaseSettings):
         description="Number of messages to prefetch per consumer"
     )
     
+    # Backtesting Configuration
+    backtest_workers: int = Field(
+        default=4,
+        description="Number of thread pool workers for backtesting"
+    )
+    
+    rabbitmq_backtest_queue: str = Field(
+        default="backtest_processing",
+        description="Queue name for backtest processing"
+    )
+    
+    rabbitmq_backtest_dlq: str = Field(
+        default="backtest_processing_dlq",
+        description="Dead letter queue for failed backtests"
+    )
+    
     model_config = SettingsConfigDict(
         env_file=".env",
         env_file_encoding="utf-8",

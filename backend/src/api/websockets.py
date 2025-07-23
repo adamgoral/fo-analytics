@@ -1,6 +1,6 @@
 """WebSocket connection manager and endpoints."""
 
-from typing import Dict, List, Set
+from typing import Dict, List, Set, Optional, Any
 from fastapi import WebSocket, WebSocketDisconnect
 from datetime import datetime
 import json
@@ -183,6 +183,37 @@ class WebSocketNotifier:
                 "strategy_name": strategy_name
             }
         }, user_id)
+    
+    @staticmethod
+    async def send_backtest_notification(
+        backtest_id: int,
+        status: str,
+        message: str,
+        progress: int = 0,
+        results: Optional[Dict[str, Any]] = None,
+        user_id: Optional[str] = None
+    ):
+        """Send backtest-related notifications."""
+        notification = {
+            "type": f"backtest.{status}",
+            "timestamp": datetime.utcnow().isoformat(),
+            "data": {
+                "backtest_id": backtest_id,
+                "status": status,
+                "message": message,
+                "progress": progress
+            }
+        }
+        
+        if results:
+            notification["data"]["results"] = results
+        
+        if user_id:
+            await manager.send_personal_message(notification, user_id)
+        else:
+            # For worker processes that don't have user_id, broadcast to all
+            # In production, we'd look up the user_id from the backtest
+            await manager.broadcast(notification)
 
 
 notifier = WebSocketNotifier()

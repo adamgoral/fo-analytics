@@ -1,6 +1,6 @@
 """Backtest API endpoints."""
 
-from typing import List, Optional
+from typing import List, Optional, Dict, Any
 from datetime import datetime
 
 from fastapi import APIRouter, Depends, HTTPException, status, Query
@@ -8,11 +8,12 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from core.auth import get_current_active_user
 from core.database import get_db
-from core.dependencies import get_backtest_repository, get_strategy_repository
+from core.dependencies import get_backtest_repository, get_strategy_repository, get_unit_of_work
 from models.user import User
 from models.backtest import BacktestStatus
 from repositories.backtest import BacktestRepository
 from repositories.strategy import StrategyRepository
+from repositories.unit_of_work import UnitOfWork
 from schemas.backtest import (
     BacktestCreate,
     BacktestUpdate,
@@ -20,44 +21,49 @@ from schemas.backtest import (
     BacktestListResponse,
     BacktestResultsUpload
 )
+from services.backtesting import BacktestingService
 
 router = APIRouter(prefix="/backtests", tags=["backtests"])
 
 
-@router.post("/", response_model=BacktestResponse, status_code=status.HTTP_201_CREATED)
+@router.post("/", response_model=Dict[str, Any], status_code=status.HTTP_201_CREATED)
 async def create_backtest(
     backtest_data: BacktestCreate,
     current_user: User = Depends(get_current_active_user),
-    backtest_repo: BacktestRepository = Depends(get_backtest_repository),
-    strategy_repo: StrategyRepository = Depends(get_strategy_repository),
+    uow: UnitOfWork = Depends(get_unit_of_work),
 ):
     """
-    Create a new backtest for a strategy.
+    Create a new backtest for a strategy and run it asynchronously.
     
     Requires authentication and strategy ownership.
+    The backtest will be queued and executed in the background.
     """
+    # Create backtesting service
+    backtest_service = BacktestingService(uow)
+    
     # Verify strategy ownership
-    strategy = await strategy_repo.get(backtest_data.strategy_id)
+    async with uow:
+        strategy = await uow.strategies.get(backtest_data.strategy_id)
+        
+        if not strategy:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Strategy not found"
+            )
+        
+        if strategy.created_by_id != current_user.id:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="Not authorized to create backtests for this strategy"
+            )
     
-    if not strategy:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Strategy not found"
-        )
+    # Create and run backtest
+    result = await backtest_service.create_and_run_backtest(
+        backtest_data,
+        current_user.id
+    )
     
-    if strategy.created_by_id != current_user.id:
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="Not authorized to create backtests for this strategy"
-        )
-    
-    # Create backtest
-    backtest_dict = backtest_data.model_dump()
-    backtest_dict["created_by_id"] = current_user.id
-    backtest_dict["status"] = BacktestStatus.QUEUED
-    
-    backtest = await backtest_repo.create(**backtest_dict)
-    return backtest
+    return result
 
 
 @router.get("/", response_model=BacktestListResponse)
@@ -370,3 +376,18 @@ async def upload_backtest_results(
     updated_backtest = await backtest_repo.update(backtest_id, **update_data)
     
     return updated_backtest
+
+
+@router.get("/strategy-types", response_model=List[str])
+async def get_available_strategy_types(
+    current_user: User = Depends(get_current_active_user),
+):
+    """
+    Get list of available strategy types for backtesting.
+    
+    Returns the built-in strategy types that can be used for backtesting.
+    """
+    from services.backtesting import StrategyFactory
+    
+    factory = StrategyFactory()
+    return factory.list_available_strategies()

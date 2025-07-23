@@ -97,6 +97,13 @@ dc_resource(
     resource_deps=['postgres', 'redis', 'rabbitmq', 'minio']
 )
 
+# Configure backtest worker service resource
+dc_resource(
+    'backtest-worker',
+    labels=['processing', 'python'],
+    resource_deps=['postgres', 'redis', 'rabbitmq']
+)
+
 # Local development helpers
 
 # Run backend tests
