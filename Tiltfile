@@ -90,6 +90,13 @@ dc_resource(
     labels=['storage']
 )
 
+# Configure worker service resource
+dc_resource(
+    'worker',
+    labels=['processing', 'python'],
+    resource_deps=['postgres', 'redis', 'rabbitmq', 'minio']
+)
+
 # Local development helpers
 
 # Run backend tests

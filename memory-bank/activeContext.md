@@ -3,7 +3,7 @@
 ## Current State (July 23, 2025)
 
 ### Project Phase: Sprint 2 In Progress - Document Processing & AI Integration
-The project has completed Sprint 1 with 84% test coverage and has now begun Sprint 2. The first task of Sprint 2 (MinIO document storage) has been completed, enabling cloud-native document storage with S3 compatibility.
+The project has completed Sprint 1 with 84% test coverage and is now 62.5% through Sprint 2. Document processing pipeline with RabbitMQ message queue has been implemented, enabling asynchronous processing of uploaded documents through parsing and AI strategy extraction.
 
 ### Recent Updates (Post-Sprint 1)
 - ✅ **Python Import Structure Fixed**: Cleaned up package configuration
@@ -87,6 +87,22 @@ The project has completed Sprint 1 with 84% test coverage and has now begun Spri
   - Prepared OpenAI and Google Gemini provider skeletons
   - Ready for strategy extraction from parsed documents
 
+- ✅ **RabbitMQ Document Processing Pipeline**: Complete async processing implementation
+  - Created message queue infrastructure with aio-pika
+  - Built connection manager with automatic reconnection
+  - Implemented message schemas with Pydantic validation
+  - Created publisher for document processing messages
+  - Built consumer/worker for processing documents
+  - Integrated with storage, parser, and LLM services
+  - Added retry logic with exponential backoff (max 3 retries)
+  - Configured dead letter queue for failed messages
+  - Updated document API endpoints to publish to queue
+  - Created worker service in Docker Compose
+  - Added worker to Tilt configuration
+  - Implemented status tracking throughout pipeline
+  - Built comprehensive test suite with ~95% coverage
+  - Added end-to-end pipeline testing script
+
 ### What Exists
 - Complete PRD with technical specifications and architecture
 - BRD with business requirements and market analysis
@@ -148,9 +164,8 @@ The project has completed Sprint 1 with 84% test coverage and has now begun Spri
   - Axios service layer with interceptors
 
 ### What Doesn't Exist Yet (Sprint 2 Focus)
-- **Event System**: RabbitMQ message queue implementation
+- **WebSocket Support**: Real-time updates for processing status
 - **Backtesting**: Integration with backtesting frameworks
-- **Real-time Updates**: WebSocket implementation
 - **Advanced UI**: Interactive document viewer and strategy editor
 - **Cloud Deployment**: Kubernetes manifests and Terraform configs
 - **Monitoring Stack**: Prometheus/Grafana setup
@@ -354,34 +369,39 @@ None - implementation is progressing smoothly
 - ✅ MinIO integration for file storage
 - ✅ Document upload/download API with streaming
 - ✅ Presigned URL generation
-- ✅ Comprehensive storage tests
+- ✅ PDF parsing and text extraction service
+- ✅ Anthropic Claude API integration
+- ✅ RabbitMQ document processing pipeline
+- ✅ Comprehensive test coverage for all components
 
-### Next Priority: Document Processing Queue with RabbitMQ
-1. **Message Queue Implementation**:
-   - Set up RabbitMQ message publishers
-   - Create document processing queue
-   - Implement strategy extraction workers
-   - Build event handlers for workflow orchestration
+### Current Architecture
+The document processing flow is now fully operational:
+1. **Upload**: Documents uploaded to MinIO via API
+2. **Queue**: Upload publishes message to RabbitMQ
+3. **Worker**: Consumer processes document asynchronously
+4. **Parse**: LlamaIndex extracts text and metadata
+5. **Extract**: Claude API identifies investment strategies
+6. **Store**: Results saved to PostgreSQL
+7. **Status**: Updates tracked throughout pipeline
 
-2. **Processing Pipeline**:
-   - Connect document upload to processing queue
-   - Integrate parser service with LLM service
-   - Store extracted strategies in database
-   - Update document status throughout pipeline
+### Next Priority: WebSocket Real-time Updates
+1. **WebSocket Implementation**:
+   - Add WebSocket support to FastAPI
+   - Create real-time notification system
+   - Build progress tracking for document processing
+   - Implement live status updates
 
-3. **Integration Points**:
-   - Event-driven architecture for scalability
-   - Dead letter queue for failed processing
-   - Progress tracking and status updates
-   - Retry logic for transient failures
+2. **Frontend Integration**:
+   - Connect to WebSocket for live updates
+   - Show processing progress in UI
+   - Display real-time notifications
 
 ### Remaining Sprint 2 Tasks
-- [✓] PDF parsing and text extraction service - COMPLETED
-- [✓] Anthropic Claude API integration - COMPLETED
-- [ ] Document processing queue with RabbitMQ
 - [ ] WebSocket support for real-time updates
 - [ ] Basic backtesting framework integration
 - [ ] Document viewer UI component
+
+**Sprint Progress: 5 of 8 tasks completed (62.5%)**
 
 ## Development Guidelines
 - Continue TDD approach with high test coverage

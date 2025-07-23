@@ -26,6 +26,7 @@ from schemas.document import (
 )
 from services.storage import storage_service
 from services.document_parser import DocumentParserService
+from messaging.publisher import MessagePublisher
 
 router = APIRouter(prefix="/documents", tags=["documents"])
 
@@ -116,7 +117,22 @@ async def upload_document(
             detail=f"Failed to create document record: {str(e)}"
         )
     
-    # TODO: Trigger document processing (e.g., send to queue)
+    # Publish message to processing queue
+    try:
+        publisher = MessagePublisher()
+        await publisher.publish_document_processing(
+            document_id=document.id,
+            user_id=current_user.id,
+            file_key=storage_key,
+            filename=file.filename,
+            file_size=file_size,
+            content_type=file.content_type or "application/octet-stream",
+            processing_type="full"
+        )
+    except Exception as e:
+        # Log error but don't fail the upload
+        # TODO: Add proper logging
+        print(f"Failed to publish processing message: {str(e)}")
     
     return document
 
@@ -354,31 +370,33 @@ async def process_document(
                 detail="Document has already been processed. Set force_reprocess=true to reprocess."
             )
     
-    # Update status to processing
+    # Update status to pending for queue processing
     updated_document = await document_repo.update(
         document_id,
-        status=DocumentStatus.PROCESSING,
-        processing_started_at=datetime.utcnow()
+        status=DocumentStatus.PENDING,
+        processing_started_at=None,
+        processing_completed_at=None,
+        processing_error=None
     )
     
-    # Parse the document
-    parser_service = DocumentParserService(storage_service)
-    
+    # Publish message to processing queue
     try:
-        # Extract text and metadata
-        extracted_text, metadata = await parser_service.parse_document(
+        publisher = MessagePublisher()
+        await publisher.publish_document_processing(
+            document_id=document.id,
             user_id=current_user.id,
             file_key=document.storage_path,
-            extract_metadata=True
+            filename=document.filename,
+            file_size=document.file_size,
+            content_type=document.mime_type,
+            processing_type="full"
         )
         
-        # Update document with extracted content
+        # Update status to indicate queued for processing
         updated_document = await document_repo.update(
             document_id,
-            status=DocumentStatus.COMPLETED,
-            processing_completed_at=datetime.utcnow(),
-            extracted_text=extracted_text,
-            extracted_metadata=metadata.model_dump() if metadata else {}
+            status=DocumentStatus.PROCESSING,
+            processing_started_at=datetime.utcnow()
         )
         
     except Exception as e:
@@ -386,12 +404,11 @@ async def process_document(
         updated_document = await document_repo.update(
             document_id,
             status=DocumentStatus.FAILED,
-            processing_completed_at=datetime.utcnow(),
-            processing_error=str(e)
+            processing_error=f"Failed to queue for processing: {str(e)}"
         )
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Failed to process document: {str(e)}"
+            detail=f"Failed to queue document for processing: {str(e)}"
         )
     
     return updated_document

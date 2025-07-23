@@ -137,6 +137,37 @@ class Settings(BaseSettings):
         description="Google API key for Gemini"
     )
     
+    # RabbitMQ Configuration
+    rabbitmq_url: str = Field(
+        default="amqp://guest:guest@localhost:5672/",
+        description="RabbitMQ connection URL"
+    )
+    
+    rabbitmq_exchange: str = Field(
+        default="fo_analytics",
+        description="RabbitMQ exchange name"
+    )
+    
+    rabbitmq_document_queue: str = Field(
+        default="document_processing",
+        description="Queue name for document processing"
+    )
+    
+    rabbitmq_dead_letter_queue: str = Field(
+        default="document_processing_dlq",
+        description="Dead letter queue for failed messages"
+    )
+    
+    rabbitmq_max_retries: int = Field(
+        default=3,
+        description="Maximum number of message retries"
+    )
+    
+    rabbitmq_prefetch_count: int = Field(
+        default=1,
+        description="Number of messages to prefetch per consumer"
+    )
+    
     model_config = SettingsConfigDict(
         env_file=".env",
         env_file_encoding="utf-8",

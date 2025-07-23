@@ -131,6 +131,36 @@ services:
     networks:
       - fo-network
 
+  # Document Processing Worker
+  worker:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile.dev
+    container_name: fo-analytics-worker
+    environment:
+      DATABASE_URL: postgresql+asyncpg://fo_user:fo_password@postgres:5432/fo_analytics
+      REDIS_URL: redis://redis:6379/0
+      RABBITMQ_URL: amqp://fo_user:fo_password@rabbitmq:5672/
+      MINIO_ENDPOINT: minio:9000
+      PYTHONPATH: /app/src
+      ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:-}
+    volumes:
+      - ./backend:/app
+      - backend_cache:/app/.cache
+    command: python -m worker
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+      minio:
+        condition: service_healthy
+    networks:
+      - fo-network
+    restart: unless-stopped
+
   # pgAdmin for PostgreSQL management
   pgadmin:
     image: dpage/pgadmin4:latest

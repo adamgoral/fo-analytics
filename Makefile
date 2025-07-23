@@ -1,4 +1,4 @@
-.PHONY: help up down build logs ps clean restart shell-backend shell-frontend db-shell redis-cli tilt tilt-down tilt-logs
+.PHONY: help up down build logs ps clean restart shell-backend shell-frontend db-shell redis-cli rabbitmq-ui worker-logs worker-restart tilt tilt-down tilt-logs
 
 help:
 	@echo "Available commands:"
@@ -18,6 +18,9 @@ help:
 	@echo "  make shell-frontend  - Open shell in frontend container"
 	@echo "  make db-shell        - Open PostgreSQL shell"
 	@echo "  make redis-cli       - Open Redis CLI"
+	@echo "  make rabbitmq-ui     - Open RabbitMQ management UI URL"
+	@echo "  make worker-logs     - Show worker logs"
+	@echo "  make worker-restart  - Restart the worker"
 	@echo ""
 	@echo "Tilt Development Commands:"
 	@echo "  make tilt            - Start development environment with Tilt"
@@ -76,6 +79,19 @@ db-shell:
 # Redis access
 redis-cli:
 	docker-compose exec redis redis-cli
+
+# RabbitMQ access
+rabbitmq-ui:
+	@echo "RabbitMQ Management UI: http://localhost:15672"
+	@echo "Username: fo_user"
+	@echo "Password: fo_password"
+
+# Worker commands
+worker-logs:
+	docker-compose logs -f worker
+
+worker-restart:
+	docker-compose restart worker
 
 # Development setup
 setup:

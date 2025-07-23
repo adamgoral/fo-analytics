@@ -13,6 +13,7 @@ from api.backtests import router as backtests_router
 from api.documents import router as documents_router
 from utils.logging import configure_logging, logger
 from middleware.logging import RequestLoggingMiddleware, PerformanceLoggingMiddleware
+from messaging.connection import get_rabbitmq_connection
 
 
 @asynccontextmanager
@@ -24,6 +25,7 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
     - Logging configuration
     - Database connections
     - Background tasks
+    - Message queue connections
     """
     # Configure logging on startup
     configure_logging()
@@ -34,9 +36,25 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
         environment="development" if settings.debug else "production",
     )
     
+    # Initialize RabbitMQ connection
+    try:
+        rabbitmq = await get_rabbitmq_connection()
+        logger.info("RabbitMQ connection initialized")
+    except Exception as e:
+        logger.error("Failed to initialize RabbitMQ connection", error=str(e))
+        # Don't fail startup if RabbitMQ is unavailable
+        # The connection will be established when first needed
+    
     yield
     
     # Cleanup on shutdown
+    try:
+        if 'rabbitmq' in locals():
+            await rabbitmq.disconnect()
+            logger.info("RabbitMQ connection closed")
+    except Exception as e:
+        logger.error("Error closing RabbitMQ connection", error=str(e))
+    
     logger.info("application_shutdown")
 
 

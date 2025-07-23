@@ -36,14 +36,31 @@ The platform follows a microservices architecture pattern with clear service bou
 
 ## Key Design Patterns
 
-### 1. Event-Driven Architecture
+### 1. Event-Driven Architecture (✅ Implemented July 23, 2025)
 - **Pattern**: Publish-Subscribe via RabbitMQ
+- **Implementation Status**: ✅ Fully operational with aio-pika
 - **Use Cases**: 
-  - Document processing pipeline
-  - Strategy extraction workflow
-  - Backtest job orchestration
-- **Benefits**: Loose coupling, scalability, fault tolerance
-- **Implementation Status**: ✅ RabbitMQ configured in Docker, ready for use
+  - Document processing pipeline (✅ Implemented)
+  - Strategy extraction workflow (✅ Implemented)
+  - Backtest job orchestration (Planned)
+- **Benefits**: 
+  - Loose coupling between services
+  - Horizontal scalability for workers
+  - Fault tolerance with retry and DLQ
+  - Asynchronous processing for long operations
+- **Architecture**:
+  ```python
+  # Message flow
+  Upload → Publish → Queue → Worker → Process → Result
+                       ↓
+                  Dead Letter Queue (on failure)
+  
+  # Configuration
+  Exchange: fo_analytics (topic)
+  Main Queue: document_processing
+  DLQ: document_processing_dlq
+  Max Retries: 3 with exponential backoff
+  ```
 
 ### 2. API Gateway Pattern
 - **Implementation**: Kong or Nginx
@@ -213,15 +230,24 @@ The platform follows a microservices architecture pattern with clear service bou
 
 ## Data Flow Patterns
 
-### Document Processing Pipeline
+### Document Processing Pipeline (✅ Implemented July 23, 2025)
 ```
-1. Upload → Document Service
-2. Validate → Store in S3
-3. Publish "DocumentUploaded" event
-4. AI Service consumes event
-5. Extract strategies → Store results
-6. Publish "StrategiesExtracted" event
-7. Notify user via WebSocket
+1. Upload → Document Service API
+2. Validate → Store in MinIO/S3
+3. Publish DocumentProcessingMessage to RabbitMQ
+4. Worker consumes message from queue
+5. Parse document with LlamaIndex
+6. Extract strategies with Claude API
+7. Store results in PostgreSQL
+8. Update document status
+9. Publish ProcessingResultMessage
+10. (Future) Notify user via WebSocket
+
+Current Implementation:
+- Async processing with status tracking
+- Retry logic for transient failures
+- Dead letter queue for permanent failures
+- Comprehensive error handling
 ```
 
 ### Strategy Backtesting Flow
@@ -354,11 +380,67 @@ results = await backtest_service.analyze_strategy(strategies)
 - **Cleanup Strategy**: Automatic deletion on errors
 - **Streaming**: Large file support via streaming responses
 
+## Message Queue Patterns (✅ Implemented July 23, 2025)
+
+### RabbitMQ Architecture
+- **Connection Management**:
+  - Robust connection with automatic reconnection
+  - Channel pooling for performance
+  - Graceful shutdown handling
+- **Message Schema**:
+  - Pydantic models for type safety
+  - JSON serialization for messages
+  - Correlation IDs for tracking
+- **Queue Configuration**:
+  ```python
+  # Main processing queue
+  document_processing:
+    - Durable: true
+    - TTL: 1 hour
+    - Dead letter exchange: ""
+    - Dead letter routing key: document_processing_dlq
+  
+  # Dead letter queue
+  document_processing_dlq:
+    - Durable: true
+    - TTL: 24 hours
+    - Manual intervention required
+  ```
+
+### Message Processing Patterns
+- **Publisher Pattern**:
+  - Fire-and-forget for document upload
+  - Correlation ID for request tracking
+  - Error handling without blocking API
+- **Consumer Pattern**:
+  - Acknowledgment after successful processing
+  - Retry with exponential backoff
+  - Dead letter queue for failed messages
+  - Status updates throughout pipeline
+- **Worker Scaling**:
+  - Multiple workers can consume from same queue
+  - Prefetch count = 1 for fair distribution
+  - Graceful shutdown on SIGTERM
+
+### Error Recovery Strategy
+1. **Transient Failures** (network, rate limits):
+   - Retry up to 3 times
+   - Exponential backoff: 1s, 2s, 4s
+   - Preserve original message
+2. **Permanent Failures** (invalid document, parsing error):
+   - Send to dead letter queue
+   - Log detailed error information
+   - Update document status to failed
+3. **System Failures** (worker crash):
+   - Message remains in queue (not acknowledged)
+   - Another worker picks it up
+   - At-least-once delivery guarantee
+
 ## Error Handling Patterns
 
 ### Resilience Patterns
 1. **Circuit Breaker**: Prevent cascade failures
-2. **Retry with Backoff**: Handle transient failures
+2. **Retry with Backoff**: Handle transient failures (✅ Implemented in LLM and Queue)
 3. **Timeout**: Prevent hanging requests
 4. **Bulkhead**: Isolate critical resources
 5. **Fallback**: Graceful degradation
@@ -416,15 +498,24 @@ class ErrorResponse(BaseModel):
 
 ### Development Environment (✅ Implemented)
 - **Docker Compose**: Multi-container orchestration
+  - PostgreSQL, Redis, RabbitMQ, MinIO services
+  - Backend API and Frontend services
+  - Document processing worker service
+  - All with health checks and proper dependencies
 - **Tilt.dev Integration**: Development environment orchestration
   - Live updates without container rebuilds
   - Unified dashboard for all services
   - Integrated development commands
   - Automatic dependency management
+  - Worker service with auto-restart
 - **Hot Reloading**: Both backend and frontend
 - **Health Checks**: All services monitored
 - **Networking**: Isolated network with service discovery
 - **Volumes**: Persistent data and code mounting
+- **Management Tools**:
+  - RabbitMQ Management UI: localhost:15672
+  - MinIO Console: localhost:9001
+  - API Documentation: localhost:8000/api/v1/docs
 
 ### CI/CD Pipeline (✅ Implemented)
 - **GitHub Actions**: Automated workflows
