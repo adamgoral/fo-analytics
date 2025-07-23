@@ -1,7 +1,6 @@
 """User API endpoints demonstrating repository pattern usage."""
 
 from typing import List
-from uuid import UUID
 
 from fastapi import APIRouter, Depends, HTTPException, status
 from pydantic import BaseModel, EmailStr
@@ -15,7 +14,7 @@ router = APIRouter(prefix="/users", tags=["users"])
 class UserResponse(BaseModel):
     """User response schema."""
     
-    id: UUID
+    id: int
     email: EmailStr
     username: str
     full_name: str
@@ -33,7 +32,7 @@ class UserCreate(BaseModel):
 
 @router.get("/{user_id}", response_model=UserResponse)
 async def get_user(
-    user_id: UUID,
+    user_id: int,
     user_repo: UserRepository = Depends(get_user_repository),
 ):
     """Get a user by ID."""
