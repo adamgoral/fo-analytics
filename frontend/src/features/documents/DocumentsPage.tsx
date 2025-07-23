@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
   Box,
   Typography,
@@ -23,6 +23,8 @@ import {
   TextField,
   LinearProgress,
   Alert,
+  Snackbar,
+  CircularProgress,
 } from '@mui/material';
 import {
   Add as AddIcon,
@@ -33,8 +35,18 @@ import {
   Download as DownloadIcon,
   Visibility as ViewIcon,
   TrendingUp as AnalyzeIcon,
+  CheckCircle as CheckIcon,
+  Error as ErrorIcon,
 } from '@mui/icons-material';
 import { useAuth } from '../../hooks';
+import { useWebSocket } from '../../hooks/useWebSocket';
+import { 
+  DocumentProcessingProgressMessage,
+  DocumentProcessingCompletedMessage,
+  DocumentProcessingFailedMessage,
+  StrategyExtractedMessage,
+  WebSocketMessage
+} from '../../services/websocket';
 
 interface Document {
   id: string;
@@ -44,6 +56,8 @@ interface Document {
   status: 'processing' | 'completed' | 'failed';
   strategiesCount: number;
   uploadedBy: string;
+  processingProgress?: number;
+  processingMessage?: string;
 }
 
 const DocumentsPage: React.FC = () => {
@@ -54,9 +68,10 @@ const DocumentsPage: React.FC = () => {
   const [uploadProgress, setUploadProgress] = useState(0);
   const [menuAnchor, setMenuAnchor] = useState<null | HTMLElement>(null);
   const [selectedDocumentId, setSelectedDocumentId] = useState<string | null>(null);
+  const [notification, setNotification] = useState<{ message: string; severity: 'success' | 'error' | 'info' } | null>(null);
 
   // Mock data - in real app this would come from API
-  const [documents] = useState<Document[]>([
+  const [documents, setDocuments] = useState<Document[]>([
     {
       id: '1',
       name: 'Q4 Trading Strategy.pdf',
@@ -85,6 +100,71 @@ const DocumentsPage: React.FC = () => {
       uploadedBy: 'Mike Johnson',
     },
   ]);
+
+  // WebSocket handlers
+  const handleProcessingProgress = useCallback((message: WebSocketMessage) => {
+    const progressMsg = message as DocumentProcessingProgressMessage;
+    setDocuments(prev => prev.map(doc => 
+      doc.id === progressMsg.data.document_id 
+        ? { 
+            ...doc, 
+            processingProgress: progressMsg.data.progress * 100,
+            processingMessage: progressMsg.data.message 
+          }
+        : doc
+    ));
+  }, []);
+
+  const handleProcessingCompleted = useCallback((message: WebSocketMessage) => {
+    const completedMsg = message as DocumentProcessingCompletedMessage;
+    setDocuments(prev => prev.map(doc => 
+      doc.id === completedMsg.data.document_id 
+        ? { 
+            ...doc, 
+            status: 'completed',
+            strategiesCount: completedMsg.data.strategies_count,
+            processingProgress: 100,
+            processingMessage: undefined
+          }
+        : doc
+    ));
+    setNotification({
+      message: `Document processed successfully! ${completedMsg.data.strategies_count} strategies extracted.`,
+      severity: 'success'
+    });
+  }, []);
+
+  const handleProcessingFailed = useCallback((message: WebSocketMessage) => {
+    const failedMsg = message as DocumentProcessingFailedMessage;
+    setDocuments(prev => prev.map(doc => 
+      doc.id === failedMsg.data.document_id 
+        ? { 
+            ...doc, 
+            status: 'failed',
+            processingProgress: undefined,
+            processingMessage: undefined
+          }
+        : doc
+    ));
+    setNotification({
+      message: `Document processing failed: ${failedMsg.data.error}`,
+      severity: 'error'
+    });
+  }, []);
+
+  const handleStrategyExtracted = useCallback((message: WebSocketMessage) => {
+    const strategyMsg = message as StrategyExtractedMessage;
+    setNotification({
+      message: `Strategy extracted: ${strategyMsg.data.strategy_name}`,
+      severity: 'info'
+    });
+  }, []);
+
+  // Subscribe to WebSocket events
+  useWebSocket('document.processing.progress', handleProcessingProgress);
+  useWebSocket('document.processing.completed', handleProcessingCompleted);
+  useWebSocket('document.processing.failed', handleProcessingFailed);
+  useWebSocket('strategy.extracted', handleStrategyExtracted);
 
   const formatFileSize = (bytes: number): string => {
     if (bytes === 0) return '0 Bytes';
@@ -284,6 +364,25 @@ const DocumentsPage: React.FC = () => {
                         <Typography variant="body2" color="text.secondary">
                           By {document.uploadedBy} • {document.strategiesCount} strategies extracted
                         </Typography>
+                        {document.status === 'processing' && document.processingProgress !== undefined && (
+                          <Box sx={{ mt: 1 }}>
+                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                              <LinearProgress 
+                                variant="determinate" 
+                                value={document.processingProgress} 
+                                sx={{ flexGrow: 1, height: 6 }}
+                              />
+                              <Typography variant="caption" color="text.secondary">
+                                {Math.round(document.processingProgress)}%
+                              </Typography>
+                            </Box>
+                            {document.processingMessage && (
+                              <Typography variant="caption" color="text.secondary" sx={{ mt: 0.5 }}>
+                                {document.processingMessage}
+                              </Typography>
+                            )}
+                          </Box>
+                        )}
                       </Box>
                     }
                   />
@@ -386,6 +485,28 @@ const DocumentsPage: React.FC = () => {
           </Button>
         </DialogActions>
       </Dialog>
+
+      {/* Notification Snackbar */}
+      <Snackbar
+        open={notification !== null}
+        autoHideDuration={6000}
+        onClose={() => setNotification(null)}
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
+      >
+        {notification && (
+          <Alert 
+            onClose={() => setNotification(null)} 
+            severity={notification.severity}
+            sx={{ width: '100%' }}
+            icon={
+              notification.severity === 'success' ? <CheckIcon /> : 
+              notification.severity === 'error' ? <ErrorIcon /> : undefined
+            }
+          >
+            {notification.message}
+          </Alert>
+        )}
+      </Snackbar>
     </Box>
   );
 };

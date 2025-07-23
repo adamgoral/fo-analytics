@@ -397,11 +397,46 @@ None accumulated yet - clean slate for implementation
 3. [✓] Fix and configure Tilt.dev environment - COMPLETED (July 23)
 4. [✓] Integrate Anthropic Claude API for strategy extraction - COMPLETED (July 23)
 5. [✓] Build document processing pipeline with RabbitMQ - COMPLETED (July 23)
-6. [ ] Create WebSocket support for real-time updates
+6. [✓] Create WebSocket support for real-time updates - COMPLETED (July 23)
 7. [ ] Implement basic backtesting integration
 8. [ ] Build interactive UI components for document viewer
 
-**Sprint Progress: 5 of 8 tasks completed (62.5%)**
+**Sprint Progress: 6 of 8 tasks completed (75%)**
+
+- ✅ **WebSocket Real-time Updates Implementation**: (July 23, 2025)
+  - Created WebSocket connection manager for handling multiple client connections
+  - Implemented JWT-based authentication for WebSocket connections
+  - Built typed notification system for document processing events:
+    - Upload started/completed notifications
+    - Processing progress updates (with percentage and status messages)
+    - Strategy extraction notifications
+    - Processing completed/failed notifications
+  - Integrated WebSocket notifications throughout the document pipeline:
+    - Document upload endpoints send real-time status updates
+    - RabbitMQ consumer sends progress updates during processing
+    - Progress tracking during PDF parsing and LLM analysis
+  - Created frontend WebSocket service with:
+    - Auto-reconnection with exponential backoff
+    - Ping/pong for connection health monitoring
+    - Message type subscriptions with handlers
+    - Connection state management
+  - Built React hooks for WebSocket integration:
+    - useWebSocket hook for subscribing to message types
+    - useWebSocketStatus hook for connection monitoring
+  - Updated DocumentsPage component with real-time features:
+    - Live progress bars during document processing
+    - Real-time status updates and notifications
+    - Toast notifications for important events
+  - WebSocket endpoint accessible at /api/v1/ws with token authentication
+  - **Comprehensive Test Coverage**: Added full test suite for WebSocket functionality
+    - Unit tests for ConnectionManager (connect, disconnect, broadcast, personal messages)
+    - Unit tests for WebSocketNotifier (all notification types with proper formatting)
+    - Integration tests for WebSocket endpoint (authentication, ping/pong, message handling)
+    - Tests for WebSocket notifications in document upload API
+    - Consumer tests verifying all WebSocket notifications during processing
+    - Frontend WebSocket service tests (connection, reconnection, subscriptions)
+    - React hook tests for useWebSocket and useWebSocketStatus
+    - Achieved ~95% test coverage for WebSocket implementation
 
 ### Success Criteria
 - ✅ Local development environment running

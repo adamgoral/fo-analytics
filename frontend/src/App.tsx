@@ -8,15 +8,21 @@ import LoginPage from './features/auth/LoginPage';
 import DashboardPage from './features/dashboard/DashboardPage';
 import DocumentsPage from './features/documents/DocumentsPage';
 import StrategiesPage from './features/strategies/StrategiesPage';
+import { websocketService } from './services/websocket';
 import './App.css';
 
 function App() {
   const { isAuthenticated, loading, refreshUser } = useAuth();
 
-  // Initialize user data on app start if authenticated
+  // Initialize user data and WebSocket connection on app start if authenticated
   useEffect(() => {
     if (isAuthenticated) {
       refreshUser();
+      // Connect to WebSocket for real-time updates
+      websocketService.connect();
+    } else {
+      // Disconnect WebSocket if not authenticated
+      websocketService.disconnect();
     }
   }, [isAuthenticated, refreshUser]);
 

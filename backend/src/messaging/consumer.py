@@ -17,6 +17,7 @@ from db.session import get_db
 from .connection import get_rabbitmq_connection
 from .publisher import MessagePublisher
 from .schemas import DocumentProcessingMessage, MessageStatus
+from api.websockets import notifier
 
 logger = structlog.get_logger(__name__)
 
@@ -91,6 +92,12 @@ class DocumentProcessingConsumer:
                 )
                 await db.commit()
             
+            # Send WebSocket notification
+            await notifier.document_processing_started(
+                user_id=str(data.user_id),
+                document_id=str(data.document_id)
+            )
+            
             # Process based on type
             if data.processing_type == "parse_only":
                 result = await self._parse_document(data)
@@ -126,6 +133,14 @@ class DocumentProcessingConsumer:
                 await doc_repo.update(data.document_id, update_data)
                 await db.commit()
             
+            # Send WebSocket notification
+            strategies_count = result.get("strategy_count", 0)
+            await notifier.document_processing_completed(
+                user_id=str(data.user_id),
+                document_id=str(data.document_id),
+                strategies_count=strategies_count
+            )
+            
             # Acknowledge message
             await message.ack()
             
@@ -151,8 +166,24 @@ class DocumentProcessingConsumer:
                 
     async def _parse_document(self, data: DocumentProcessingMessage) -> dict:
         """Parse document and extract text."""
+        # Send progress notification
+        await notifier.document_processing_progress(
+            user_id=str(data.user_id),
+            document_id=str(data.document_id),
+            progress=0.2,
+            message="Downloading document from storage"
+        )
+        
         # Download document from storage
         file_content = await self._storage_service.download_file(data.file_key)
+        
+        # Send progress notification
+        await notifier.document_processing_progress(
+            user_id=str(data.user_id),
+            document_id=str(data.document_id),
+            progress=0.4,
+            message="Parsing document content"
+        )
         
         # Parse document
         parsed_doc = await self._parser_service.parse_document(
@@ -169,6 +200,14 @@ class DocumentProcessingConsumer:
         
     async def _extract_strategies(self, data: DocumentProcessingMessage) -> dict:
         """Extract strategies from document text."""
+        # Send progress notification
+        await notifier.document_processing_progress(
+            user_id=str(data.user_id),
+            document_id=str(data.document_id),
+            progress=0.6,
+            message="Retrieving document text"
+        )
+        
         # Get document text from database
         async for db in get_db():
             doc_repo = DocumentRepository(db)
@@ -178,9 +217,26 @@ class DocumentProcessingConsumer:
                 raise ValueError("Document text not found")
                 
             text = document.extracted_text
+        
+        # Send progress notification
+        await notifier.document_processing_progress(
+            user_id=str(data.user_id),
+            document_id=str(data.document_id),
+            progress=0.8,
+            message="Analyzing document with AI to extract strategies"
+        )
             
         # Extract strategies using LLM
         strategies = await self._llm_service.extract_strategies(text)
+        
+        # Send notification for each extracted strategy
+        for i, strategy in enumerate(strategies):
+            await notifier.strategy_extracted(
+                user_id=str(data.user_id),
+                document_id=str(data.document_id),
+                strategy_id=f"{data.document_id}_strategy_{i}",
+                strategy_name=strategy.get("name", f"Strategy {i+1}")
+            )
         
         return {
             "strategies": strategies,
@@ -223,6 +279,13 @@ class DocumentProcessingConsumer:
                     }
                 )
                 await db.commit()
+            
+            # Send WebSocket notification
+            await notifier.document_processing_failed(
+                user_id=str(data.user_id),
+                document_id=str(data.document_id),
+                error=error
+            )
             
             # Check retry count
             if data.retry_count < settings.rabbitmq_max_retries:

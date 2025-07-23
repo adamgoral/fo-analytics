@@ -27,6 +27,7 @@ from schemas.document import (
 from services.storage import storage_service
 from services.document_parser import DocumentParserService
 from messaging.publisher import MessagePublisher
+from api.websockets import notifier
 
 router = APIRouter(prefix="/documents", tags=["documents"])
 
@@ -93,6 +94,13 @@ async def upload_document(
             detail=f"Failed to upload file to storage: {str(e)}"
         )
     
+    # Send WebSocket notification for upload started
+    await notifier.document_upload_started(
+        user_id=str(current_user.id),
+        document_id="pending",  # Temporary ID until DB record created
+        filename=file.filename
+    )
+    
     # Create document record
     document_data = DocumentCreate(
         filename=Path(file.filename).name,
@@ -133,6 +141,13 @@ async def upload_document(
         # Log error but don't fail the upload
         # TODO: Add proper logging
         print(f"Failed to publish processing message: {str(e)}")
+    
+    # Send WebSocket notification for upload completed
+    await notifier.document_upload_completed(
+        user_id=str(current_user.id),
+        document_id=str(document.id),
+        filename=file.filename
+    )
     
     return document
 
