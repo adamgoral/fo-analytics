@@ -63,7 +63,37 @@
 - Docker Desktop
 - uv (Python package manager)
 - git
+- Tilt (https://tilt.dev) - Development environment orchestration
 ```
+
+### Development Environment: Tilt.dev ✅ Implemented
+
+The project uses **Tilt.dev** for local development orchestration, providing:
+- **Live Updates**: Code changes sync to containers without rebuilds
+- **Resource Management**: All services managed through single interface
+- **Development Tools**: Integrated testing, linting, and formatting commands
+- **Unified Dashboard**: Monitor all services at http://localhost:10350
+
+#### Quick Start with Tilt
+```bash
+# Start development environment
+make tilt
+
+# Stop environment
+make tilt-down
+
+# Stream logs
+make tilt-logs
+```
+
+#### Tilt Features Configured
+- **Backend Live Updates**: Python code syncs, auto-restart on changes
+- **Frontend Hot Reload**: Vite HMR for instant UI updates
+- **Database Migrations**: Auto-run on schema changes
+- **Dependency Management**: Auto-install on package changes
+- **Development Commands**: Test, lint, format available in Tilt UI
+- **Service Dependencies**: Proper startup order enforced
+- **Health Checks**: Readiness probes for all services
 
 ### Local Environment Structure
 ```

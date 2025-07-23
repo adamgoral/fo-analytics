@@ -1,7 +1,9 @@
-.PHONY: help up down build logs ps clean restart shell-backend shell-frontend db-shell redis-cli
+.PHONY: help up down build logs ps clean restart shell-backend shell-frontend db-shell redis-cli tilt tilt-down tilt-logs
 
 help:
 	@echo "Available commands:"
+	@echo ""
+	@echo "Docker Compose Commands:"
 	@echo "  make up              - Start all services"
 	@echo "  make up-tools        - Start all services including tools (pgAdmin)"
 	@echo "  make down            - Stop all services"
@@ -16,6 +18,11 @@ help:
 	@echo "  make shell-frontend  - Open shell in frontend container"
 	@echo "  make db-shell        - Open PostgreSQL shell"
 	@echo "  make redis-cli       - Open Redis CLI"
+	@echo ""
+	@echo "Tilt Development Commands:"
+	@echo "  make tilt            - Start development environment with Tilt"
+	@echo "  make tilt-down       - Stop Tilt development environment"
+	@echo "  make tilt-logs       - Stream logs from all Tilt services"
 
 # Start services
 up:
@@ -76,3 +83,18 @@ setup:
 	@cp .env.example .env
 	@echo "Please edit .env file with your configuration"
 	@echo "Then run 'make up' to start services"
+
+# Tilt commands for development
+tilt:
+	@echo "Starting Tilt development environment..."
+	@echo "Access Tilt UI at http://localhost:10350"
+	@echo "Press Ctrl+C to access the web interface"
+	tilt up
+
+tilt-down:
+	@echo "Stopping Tilt development environment..."
+	tilt down
+
+tilt-logs:
+	@echo "Streaming Tilt logs..."
+	tilt up --stream
