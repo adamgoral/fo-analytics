@@ -76,6 +76,27 @@ The project uses **Tilt.dev** for local development orchestration, providing:
 - **Development Tools**: Integrated testing, linting, and formatting commands
 - **Unified Dashboard**: Monitor all services at http://localhost:10350
 
+#### Tilt Configuration (Fixed July 23, 2025)
+- **Tiltfile**: Python-based configuration leveraging docker-compose.yml
+- **Live Update Features**:
+  - Backend: Syncs Python code, auto-restarts on changes
+  - Frontend: Vite HMR with source file syncing
+  - Dependencies: Auto-install on package.json/pyproject.toml changes
+  - Fall back to rebuild for major dependency updates
+- **Service Orchestration**:
+  - Proper dependency ordering (backend waits for databases)
+  - All ports forwarded through docker-compose configuration
+  - Health checks handled by Docker Compose
+- **Development Commands** (Manual trigger in Tilt UI):
+  - `test-backend`: Run pytest with coverage
+  - `test-coverage`: Generate HTML coverage report
+  - `format-python`: Run Ruff formatter
+  - `lint-python`: Run Ruff linter
+  - `typecheck-python`: Run mypy type checker
+  - `make-migration`: Create new Alembic migration
+  - `migrate`: Apply database migrations
+  - `storybook`: Launch Storybook for UI development
+
 #### Quick Start with Tilt
 ```bash
 # Start development environment
@@ -92,6 +113,20 @@ make tilt-logs
 - **Backend Live Updates**: Python code syncs, auto-restart on changes
 - **Frontend Hot Reload**: Vite HMR for instant UI updates
 - **Database Migrations**: Auto-run on schema changes
+
+#### Development Workflow with Tilt
+1. **Start Environment**: `tilt up` or `make tilt`
+2. **Access Services**:
+   - Tilt UI: http://localhost:10350
+   - Backend API: http://localhost:8000
+   - Frontend: http://localhost:5173
+   - API Docs: http://localhost:8000/docs
+   - RabbitMQ: http://localhost:15672
+   - MinIO: http://localhost:9001
+3. **Make Code Changes**: Files sync automatically
+4. **Run Tests**: Click "test-backend" in Tilt UI
+5. **Format Code**: Click "format-python" in Tilt UI
+6. **View Logs**: Real-time logs in Tilt UI for each service
 - **Dependency Management**: Auto-install on package changes
 - **Development Commands**: Test, lint, format available in Tilt UI
 - **Service Dependencies**: Proper startup order enforced

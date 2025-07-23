@@ -36,6 +36,13 @@ The project has completed Sprint 1 with 84% test coverage and has now begun Spri
   - Updated Makefile with Tilt commands (make tilt, make tilt-down)
   - Enables rapid development with instant code updates without rebuilds
   - All services managed through unified dashboard at http://localhost:10350
+  - **Fixed Tilt configuration issues** (July 23, 2025):
+    - Corrected `fall_back_on` directive positioning in live_update steps
+    - Removed invalid `port_forwards` from dc_resource calls
+    - Removed unsupported `readiness_probe` arguments
+    - Fixed `local_resource` serve_port parameter
+    - Added image name warning suppression
+    - Tilt now starts successfully with all services
 
 ### Sprint 2 Progress (July 23, 2025)
 - ✅ **MinIO/S3 Document Storage Implementation**: Cloud-native document storage

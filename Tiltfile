@@ -5,6 +5,9 @@
 # Load existing docker-compose configuration
 docker_compose('docker-compose.yml')
 
+# Suppress unused image warnings (docker-compose uses underscores, we use hyphens)
+update_settings(suppress_unused_image_warnings=["fo-analytics-backend", "fo-analytics-frontend"])
+
 # Configure live updates for backend service
 docker_build(
     'fo-analytics-backend',
@@ -36,6 +39,9 @@ docker_build(
     './frontend',
     dockerfile='./frontend/Dockerfile.dev',
     live_update=[
+        # Fall back to full rebuild for major dependency changes
+        fall_back_on(['./frontend/package.json', './frontend/package-lock.json']),
+        
         # Sync source files for hot module replacement
         sync('./frontend/src', '/app/src'),
         sync('./frontend/public', '/app/public'),
@@ -44,10 +50,7 @@ docker_build(
         
         # Re-install dependencies when package.json changes
         run('cd /app && npm install', 
-            trigger=['./frontend/package.json', './frontend/package-lock.json']),
-        
-        # Fall back to full rebuild for major dependency changes
-        fall_back_on(['./frontend/package.json', './frontend/package-lock.json'])
+            trigger=['./frontend/package.json', './frontend/package-lock.json'])
     ],
     ignore=['node_modules', 'dist', 'build', '.vite']
 )
@@ -55,59 +58,35 @@ docker_build(
 # Configure backend service resource
 dc_resource(
     'backend',
-    port_forwards=['8000:8000'],  # FastAPI
     labels=['api', 'python'],
-    resource_deps=['postgres', 'redis', 'rabbitmq', 'minio'],
-    readiness_probe=probe(
-        http_get=http_get_action(port=8000, path='/health'),
-        period_secs=10,
-        failure_threshold=3
-    )
+    resource_deps=['postgres', 'redis', 'rabbitmq', 'minio']
 )
 
 # Configure frontend service resource
 dc_resource(
     'frontend',
-    port_forwards=['3000:3000'],  # React dev server
     labels=['ui', 'react'],
-    resource_deps=['backend'],
-    readiness_probe=probe(
-        http_get=http_get_action(port=3000),
-        period_secs=10,
-        failure_threshold=3
-    )
+    resource_deps=['backend']
 )
 
 # Configure database resources
 dc_resource(
     'postgres',
-    port_forwards=['5432:5432'],
-    labels=['database'],
-    readiness_probe=probe(
-        exec=exec_action(['pg_isready', '-U', 'postgres']),
-        period_secs=5
-    )
+    labels=['database']
 )
 
 dc_resource(
     'redis',
-    port_forwards=['6379:6379'],
-    labels=['cache'],
-    readiness_probe=probe(
-        exec=exec_action(['redis-cli', 'ping']),
-        period_secs=5
-    )
+    labels=['cache']
 )
 
 dc_resource(
     'rabbitmq',
-    port_forwards=['5672:5672', '15672:15672'],  # AMQP and Management UI
     labels=['messaging']
 )
 
 dc_resource(
     'minio',
-    port_forwards=['9000:9000', '9001:9001'],  # API and Console
     labels=['storage']
 )
 
@@ -215,7 +194,6 @@ local_resource(
 local_resource(
     'storybook',
     serve_cmd='cd frontend && npm run storybook',
-    serve_port=6006,
     labels=['ui-dev', 'frontend'],
     auto_init=False,
     trigger_mode=TRIGGER_MODE_MANUAL,

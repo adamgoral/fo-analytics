@@ -337,16 +337,31 @@ None accumulated yet - clean slate for implementation
   - Successfully tested with text and PDF documents
   - Ready for Claude API integration for strategy extraction
 
+**Tilt.dev Environment Configuration (July 23)**
+  - Fixed multiple Tiltfile configuration issues:
+    - Corrected `fall_back_on` directive ordering in live_update
+    - Removed unsupported `port_forwards` from dc_resource calls
+    - Removed invalid `readiness_probe` arguments
+    - Fixed `local_resource` serve_port parameter issue
+    - Added image name warning suppression
+  - Tilt now successfully orchestrates all services:
+    - Backend with hot-reloading and auto-dependency updates
+    - Frontend with Vite HMR support
+    - PostgreSQL, Redis, RabbitMQ, MinIO services
+    - Development helper commands accessible via Tilt UI
+  - Enables rapid development iteration without container rebuilds
+
 ### Sprint 2 Status (July 23, 2025 - In Progress)
 1. [✓] Implement document upload to MinIO/S3 - COMPLETED (July 23)
 2. [✓] Create PDF parsing service for document text extraction - COMPLETED (July 23)
-3. [ ] Integrate Anthropic Claude API for strategy extraction
-4. [ ] Build document processing pipeline with RabbitMQ
-5. [ ] Create WebSocket support for real-time updates
-6. [ ] Implement basic backtesting integration
-7. [ ] Build interactive UI components for document viewer
+3. [✓] Fix and configure Tilt.dev environment - COMPLETED (July 23)
+4. [ ] Integrate Anthropic Claude API for strategy extraction
+5. [ ] Build document processing pipeline with RabbitMQ
+6. [ ] Create WebSocket support for real-time updates
+7. [ ] Implement basic backtesting integration
+8. [ ] Build interactive UI components for document viewer
 
-**Sprint Progress: 2 of 7 tasks completed (29%)**
+**Sprint Progress: 3 of 8 tasks completed (38%)**
 
 ### Success Criteria
 - ✅ Local development environment running
