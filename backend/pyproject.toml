@@ -5,14 +5,19 @@ description = "Add your description here"
 requires-python = ">=3.12"
 dependencies = [
     "aioboto3>=13.2.1",
+    "aiofiles>=24.1.0",
     "alembic>=1.16.4",
     "asyncpg>=0.30.0",
     "email-validator>=2.2.0",
     "fastapi>=0.116.1",
     "httpx>=0.28.1",
+    "llama-index-core>=0.12.52",
+    "llama-index-readers-file>=0.4.11",
     "passlib[bcrypt]>=1.7.4",
+    "psycopg2-binary>=2.9.10",
     "pydantic>=2.11.7",
     "pydantic-settings>=2.10.1",
+    "pymupdf>=1.26.3",
     "python-jose[cryptography]>=3.3.0",
     "python-multipart>=0.0.20",
     "redis>=6.2.0",
@@ -28,6 +33,7 @@ dev = [
     "pytest>=8.4.1",
     "pytest-asyncio>=1.1.0",
     "pytest-cov>=6.2.1",
+    "reportlab>=4.4.3",
     "ruff>=0.12.4",
     "types-redis>=4.6.0.20241004",
 ]

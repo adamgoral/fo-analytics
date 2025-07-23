@@ -233,6 +233,10 @@ None accumulated yet - clean slate for implementation
 14. **Test-Driven Development**: 84% test coverage achieved with comprehensive test suite
 15. **Async Testing Patterns**: Proper fixtures and patterns for testing async code
 16. **Coverage Configuration**: Exclude example/generated files from coverage metrics
+17. **LlamaIndex Integration**: Superior document parsing compared to traditional libraries
+18. **Storage Service Patterns**: Clean abstraction over S3/MinIO operations
+19. **Docker Environment Variables**: Proper PYTHONPATH configuration for module imports
+20. **Database Initialization**: Manual table creation scripts for development setup
 
 ## Risk Register
 
@@ -317,16 +321,32 @@ None accumulated yet - clean slate for implementation
   - Successfully tested actual MinIO operations
   - Created .env.example with all configuration options
 
+- ✅ **LlamaIndex PDF Parsing Implementation**: (July 23, 2025)
+  - Created DocumentParserService with LlamaIndex integration
+  - Used PyMuPDFReader for superior PDF parsing over PyPDF2
+  - Support for PDF, TXT, and Markdown file formats
+  - Extracts full text content preserving formatting
+  - Extracts document metadata (pages, creation date, etc.)
+  - Page-by-page parsing capability for granular access
+  - Better handling of complex layouts and tables
+  - Direct integration path for LLM processing
+  - Added extracted_text field to documents table
+  - Updated /documents/{id}/process endpoint for parsing
+  - Created /documents/{id}/content endpoint with page support
+  - Fixed import paths and async/await patterns
+  - Successfully tested with text and PDF documents
+  - Ready for Claude API integration for strategy extraction
+
 ### Sprint 2 Status (July 23, 2025 - In Progress)
 1. [✓] Implement document upload to MinIO/S3 - COMPLETED (July 23)
-2. [ ] Create PDF parsing service for document text extraction
+2. [✓] Create PDF parsing service for document text extraction - COMPLETED (July 23)
 3. [ ] Integrate Anthropic Claude API for strategy extraction
 4. [ ] Build document processing pipeline with RabbitMQ
 5. [ ] Create WebSocket support for real-time updates
 6. [ ] Implement basic backtesting integration
 7. [ ] Build interactive UI components for document viewer
 
-**Sprint Progress: 1 of 7 tasks completed (14%)**
+**Sprint Progress: 2 of 7 tasks completed (29%)**
 
 ### Success Criteria
 - ✅ Local development environment running

@@ -52,6 +52,20 @@ The project has completed Sprint 1 with 84% test coverage and has now begun Spri
   - Successfully tested actual MinIO operations with test script
   - Created .env.example with all configuration options
 
+- ✅ **PDF Parsing Service with LlamaIndex**: Advanced document text extraction
+  - Implemented DocumentParserService using LlamaIndex framework
+  - Integrated PyMuPDFReader for superior PDF parsing capabilities
+  - Support for PDF, TXT, and Markdown file formats
+  - Extracts both text content and document metadata
+  - Page-by-page parsing capability for PDFs
+  - Better handling of complex layouts, tables, and formatting
+  - Automatic document chunking for LLM processing
+  - Added extracted_text field to documents table
+  - Updated document processing API endpoint
+  - Created /documents/{id}/content endpoint for text retrieval
+  - Page-specific content retrieval support
+  - Successfully tested with both text and PDF documents
+
 ### What Exists
 - Complete PRD with technical specifications and architecture
 - BRD with business requirements and market analysis
@@ -113,7 +127,6 @@ The project has completed Sprint 1 with 84% test coverage and has now begun Spri
   - Axios service layer with interceptors
 
 ### What Doesn't Exist Yet (Sprint 2 Focus)
-- **PDF Parsing**: Text extraction from uploaded documents
 - **AI Integration**: Anthropic Claude API for strategy extraction
 - **Event System**: RabbitMQ message queue implementation
 - **Backtesting**: Integration with backtesting frameworks
@@ -323,27 +336,27 @@ None - implementation is progressing smoothly
 - ✅ Presigned URL generation
 - ✅ Comprehensive storage tests
 
-### Next Priority: PDF Parsing Service
-1. **Text Extraction**:
-   - Implement PyPDF2 or pdfplumber for PDF parsing
-   - Handle various PDF formats and encodings
-   - Extract structured text and metadata
-   - Handle OCR requirements for scanned documents
+### Next Priority: Anthropic Claude API Integration
+1. **AI Service Implementation**:
+   - Set up Anthropic SDK integration
+   - Create strategy extraction service
+   - Design prompts for financial document analysis
+   - Implement structured output parsing
 
-2. **Document Processing Pipeline**:
-   - Create document processor service
-   - Implement async processing with progress tracking
-   - Add support for DOC/DOCX files
-   - Build metadata extraction (author, date, etc.)
+2. **Strategy Extraction Pipeline**:
+   - Extract trading strategies from parsed documents
+   - Identify key financial metrics and targets
+   - Parse investment recommendations
+   - Handle different document formats and styles
 
 3. **Integration Points**:
-   - Update document model with extracted text field
-   - Create processing status updates
-   - Implement error handling for malformed documents
-   - Add processing queue with RabbitMQ
+   - Connect with document parser output
+   - Store extracted strategies in database
+   - Update document status after processing
+   - Implement error handling and retries
 
 ### Remaining Sprint 2 Tasks
-- [ ] PDF parsing and text extraction service
+- [✓] PDF parsing and text extraction service - COMPLETED
 - [ ] Anthropic Claude API integration
 - [ ] Document processing queue with RabbitMQ
 - [ ] WebSocket support for real-time updates

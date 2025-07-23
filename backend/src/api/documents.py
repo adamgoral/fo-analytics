@@ -25,6 +25,7 @@ from schemas.document import (
     DocumentProcessRequest
 )
 from services.storage import storage_service
+from services.document_parser import DocumentParserService
 
 router = APIRouter(prefix="/documents", tags=["documents"])
 
@@ -360,9 +361,111 @@ async def process_document(
         processing_started_at=datetime.utcnow()
     )
     
-    # TODO: Trigger actual document processing (e.g., send to queue)
+    # Parse the document
+    parser_service = DocumentParserService(storage_service)
+    
+    try:
+        # Extract text and metadata
+        extracted_text, metadata = await parser_service.parse_document(
+            user_id=current_user.id,
+            file_key=document.storage_path,
+            extract_metadata=True
+        )
+        
+        # Update document with extracted content
+        updated_document = await document_repo.update(
+            document_id,
+            status=DocumentStatus.COMPLETED,
+            processing_completed_at=datetime.utcnow(),
+            extracted_text=extracted_text,
+            extracted_metadata=metadata.model_dump() if metadata else {}
+        )
+        
+    except Exception as e:
+        # Update document with error
+        updated_document = await document_repo.update(
+            document_id,
+            status=DocumentStatus.FAILED,
+            processing_completed_at=datetime.utcnow(),
+            processing_error=str(e)
+        )
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to process document: {str(e)}"
+        )
     
     return updated_document
+
+
+@router.get("/{document_id}/content")
+async def get_document_content(
+    document_id: int,
+    page_number: Optional[int] = Query(None, ge=1, description="Get specific page content"),
+    current_user: User = Depends(get_current_active_user),
+    document_repo: DocumentRepository = Depends(get_document_repository),
+):
+    """
+    Get the extracted text content of a document.
+    
+    - **page_number**: Optional page number to get specific page content (PDF only)
+    
+    Requires authentication and ownership.
+    """
+    document = await document_repo.get(document_id)
+    
+    if not document:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Document not found"
+        )
+    
+    # Check ownership
+    if document.uploaded_by_id != current_user.id:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Not authorized to access this document"
+        )
+    
+    # Check if document has been processed
+    if document.status != DocumentStatus.COMPLETED:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"Document has not been processed yet. Current status: {document.status}"
+        )
+    
+    if page_number:
+        # Parse document by pages
+        parser_service = DocumentParserService(storage_service)
+        try:
+            pages = await parser_service.parse_document_by_pages(
+                user_id=current_user.id,
+                file_key=document.storage_path
+            )
+            
+            if page_number > len(pages):
+                raise HTTPException(
+                    status_code=status.HTTP_404_NOT_FOUND,
+                    detail=f"Page {page_number} not found. Document has {len(pages)} pages."
+                )
+            
+            return {
+                "document_id": document_id,
+                "page": pages[page_number - 1],
+                "total_pages": len(pages)
+            }
+            
+        except Exception as e:
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail=f"Failed to retrieve page content: {str(e)}"
+            )
+    else:
+        # Return full document content
+        return {
+            "document_id": document_id,
+            "content": document.extracted_text,
+            "metadata": document.extracted_metadata or {}
+        }
 
 
 @router.get("/status/{status}", response_model=List[DocumentResponse])

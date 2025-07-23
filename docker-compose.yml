@@ -64,7 +64,7 @@ services:
       dockerfile: Dockerfile.dev
     container_name: fo-analytics-backend
     environment:
-      DATABASE_URL: postgresql://fo_user:fo_password@postgres:5432/fo_analytics
+      DATABASE_URL: postgresql+asyncpg://fo_user:fo_password@postgres:5432/fo_analytics
       REDIS_URL: redis://redis:6379
       RABBITMQ_URL: amqp://fo_user:fo_password@rabbitmq:5672/
       MINIO_ENDPOINT: minio:9000
@@ -73,6 +73,7 @@ services:
       MINIO_USE_SSL: "false"
       PYTHONUNBUFFERED: 1
       ENVIRONMENT: development
+      PYTHONPATH: /app/src
     ports:
       - "8000:8000"
     volumes:
@@ -87,7 +88,7 @@ services:
         condition: service_healthy
       minio:
         condition: service_healthy
-    command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+    command: uv run uvicorn src.main:app --host 0.0.0.0 --port 8000 --reload
     networks:
       - fo-network
 

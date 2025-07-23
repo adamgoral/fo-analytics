@@ -51,6 +51,9 @@ class Document(Base, TimestampMixin):
     # Extracted metadata (stored as JSON)
     extracted_metadata: Mapped[dict | None] = mapped_column(JSON, nullable=True)
     
+    # Extracted text content
+    extracted_text: Mapped[str | None] = mapped_column(Text, nullable=True)
+    
     # Foreign keys
     uploaded_by_id: Mapped[int] = mapped_column(ForeignKey("users.id"), nullable=False)
     

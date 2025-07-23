@@ -55,6 +55,7 @@ class DocumentResponse(BaseModel):
     
     # Metadata
     extracted_metadata: Optional[Dict]
+    extracted_text: Optional[str]
     uploaded_by_id: int
     
     # Timestamps
@@ -75,3 +76,21 @@ class DocumentProcessRequest(BaseModel):
     """Request to process a document."""
     
     force_reprocess: bool = False
+
+
+class DocumentMetadata(BaseModel):
+    """Metadata extracted from a parsed document."""
+    
+    page_count: int
+    text_length: int
+    file_name: str
+    
+    # Optional metadata that might be extracted
+    author: Optional[str] = None
+    title: Optional[str] = None
+    subject: Optional[str] = None
+    creation_date: Optional[datetime] = None
+    modification_date: Optional[datetime] = None
+    
+    # Allow additional fields from document parsers
+    model_config = ConfigDict(extra="allow")

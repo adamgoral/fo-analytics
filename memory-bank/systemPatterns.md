@@ -135,7 +135,7 @@ The platform follows a microservices architecture pattern with clear service bou
 
 ## Service Responsibilities
 
-### Document Service (✅ Storage Layer Implemented July 23, 2025)
+### Document Service (✅ Storage & Parsing Implemented July 23, 2025)
 - **Primary Responsibility**: Document storage, retrieval, and processing
 - **Implemented Components**:
   - ✅ MinIO/S3 storage service with aioboto3
@@ -143,10 +143,17 @@ The platform follows a microservices architecture pattern with clear service bou
   - ✅ Streaming download with presigned URLs
   - ✅ Automatic bucket creation and management
   - ✅ Comprehensive error handling and cleanup
+  - ✅ LlamaIndex-based document parsing service
+  - ✅ PyMuPDFReader for advanced PDF processing
+  - ✅ Support for PDF, TXT, and Markdown formats
+  - ✅ Page-by-page parsing capability
+  - ✅ Metadata extraction from documents
 - **Key Patterns**:
   - **Storage Abstraction**: StorageService wraps S3 operations
   - **Factory Pattern**: Configurable storage backends (MinIO/S3/Azure)
   - **Repository Pattern**: Document metadata in PostgreSQL
+  - **Adapter Pattern**: LlamaIndex adapters for different file types
+  - **Strategy Pattern**: Different parsing strategies per document type
   - **Strategy Pattern**: Different file processors (PDF, DOC, TXT)
   - **Chain of Responsibility**: Validation pipeline
 - **Storage Architecture**:
@@ -270,6 +277,35 @@ The platform follows a microservices architecture pattern with clear service bou
 - **Connection Pooling**: PgBouncer
 - **Query Optimization**: Indexed lookups
 - **Partitioning**: Time-based for historical data
+
+## Document Processing Patterns (✅ Implemented July 23, 2025)
+
+### Document Parsing Architecture
+- **Framework**: LlamaIndex for advanced document understanding
+- **PDF Engine**: PyMuPDFReader for superior text extraction
+- **Supported Formats**: PDF, TXT, Markdown
+- **Key Features**:
+  - Preserves document formatting and structure
+  - Handles complex layouts and tables
+  - Page-by-page parsing capability
+  - Automatic metadata extraction
+  - Direct LLM integration path
+
+### Processing Pipeline Pattern
+```python
+# 1. Upload → 2. Store → 3. Parse → 4. Extract → 5. Analyze
+document = await upload_document(file)
+storage_key = await storage_service.upload_file(document)
+parsed_text = await parser_service.parse_document(storage_key)
+strategies = await ai_service.extract_strategies(parsed_text)
+results = await backtest_service.analyze_strategy(strategies)
+```
+
+### Storage Patterns
+- **User Isolation**: Files stored as `{user_id}/{unique_key}.{ext}`
+- **Temporary Processing**: Use tempfile for parsing operations
+- **Cleanup Strategy**: Automatic deletion on errors
+- **Streaming**: Large file support via streaming responses
 
 ## Error Handling Patterns
 

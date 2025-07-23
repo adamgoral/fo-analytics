@@ -26,17 +26,19 @@
 
 ### AI/ML Stack
 - **LLM Provider**: Anthropic Claude API
-- **Embeddings**: OpenAI Ada or Sentence Transformers
-- **Vector Store**: Pinecone or Weaviate
-- **ML Framework**: scikit-learn for metrics
-- **Document Processing**: PyPDF2, pdfplumber
+- **Document Processing**: LlamaIndex with PyMuPDFReader ✅ Implemented
+- **PDF Parsing**: PyMuPDF (superior to PyPDF2) ✅ Implemented
+- **Text Extraction**: Support for PDF, TXT, Markdown ✅ Implemented
+- **Embeddings**: OpenAI Ada or Sentence Transformers - planned
+- **Vector Store**: Pinecone or Weaviate - planned
+- **ML Framework**: scikit-learn for metrics - planned
 
 ### Data Layer
 - **Primary Database**: PostgreSQL 15+
 - **Cache**: Redis 7+
 - **Message Queue**: RabbitMQ
 - **Search**: Elasticsearch 8+
-- **Object Storage**: AWS S3 or MinIO
+- **Object Storage**: MinIO (S3-compatible) ✅ Implemented with aioboto3
 
 ### Infrastructure
 - **Container**: Docker + Docker Compose ✅ Implemented
@@ -175,10 +177,16 @@ dependencies = [
     "httpx>=0.25.0",         # Async HTTP client
     "anthropic>=0.8.0",      # Claude API
     "boto3>=1.34.0",         # AWS SDK
+    "aioboto3>=12.0.0",      # Async S3 client ✅
     "python-multipart>=0.0.6",
     "python-jose[cryptography]>=3.3.0",
     "passlib[bcrypt]>=1.7.4",
     "alembic>=1.13.0",       # Database migrations
+    "structlog>=24.0.0",     # Structured logging ✅
+    "llama-index-core>=0.10.0",  # Document processing ✅
+    "llama-index-readers-file>=0.1.0",  # File readers ✅
+    "pymupdf>=1.23.0",       # PDF parsing ✅
+    "aiofiles>=23.0.0",      # Async file operations ✅
 ]
 
 [project.optional-dependencies]
@@ -389,3 +397,29 @@ RETRY_DELAY = 1.0  # Exponential backoff
 - **Frontend**: Vite dev server on port 5173 with HMR ✅
 
 All services include health checks and are connected via custom bridge network.
+
+## Development Learnings & Best Practices
+
+### Docker Environment (July 23, 2025)
+- **PYTHONPATH Configuration**: Set `PYTHONPATH=/app/src` in docker-compose for module imports
+- **UV Package Manager**: Use `ENV UV_INSTALL_DIR="/usr/local/bin"` for proper installation
+- **Build Context**: Copy all files before `uv sync` to avoid package build errors
+- **Database URL**: Use `postgresql+asyncpg://` for async SQLAlchemy operations
+
+### LlamaIndex Integration (July 23, 2025)
+- **File Type Handling**: Use default readers for TXT/MD, custom extractors for PDF
+- **Temporary Files**: Extract filename from path to avoid nested directory issues
+- **PyMuPDFReader**: Superior to PDFReader for complex layouts and tables
+- **Storage Integration**: Download from S3 to temp file for processing
+
+### Testing Patterns
+- **Async Tests**: Use `pytest-asyncio` with proper fixtures
+- **Mock Storage**: Create mock S3 responses for unit tests
+- **PDF Generation**: Use `reportlab` for creating test PDFs
+- **Import Paths**: Configure pytest with correct PYTHONPATH
+
+### API Design
+- **Document Processing**: Separate upload and processing endpoints
+- **Content Retrieval**: Support page-specific access for large documents
+- **Error Handling**: Return processing errors in document status
+- **Streaming**: Use StreamingResponse for large file downloads
