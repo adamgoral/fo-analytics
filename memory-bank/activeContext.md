@@ -2,8 +2,8 @@
 
 ## Current State (July 23, 2025)
 
-### Project Phase: Sprint 1 Completed + Comprehensive Test Suite 🎉
-The project has successfully completed Sprint 1 and achieved 84% test coverage with a comprehensive test suite. The platform has a solid foundation with all core infrastructure in place and is now ready for Sprint 2 which will focus on AI integration and advanced features.
+### Project Phase: Sprint 2 In Progress - Document Processing & AI Integration
+The project has completed Sprint 1 with 84% test coverage and has now begun Sprint 2. The first task of Sprint 2 (MinIO document storage) has been completed, enabling cloud-native document storage with S3 compatibility.
 
 ### Recent Updates (Post-Sprint 1)
 - ✅ **Python Import Structure Fixed**: Cleaned up package configuration
@@ -36,6 +36,21 @@ The project has successfully completed Sprint 1 and achieved 84% test coverage w
   - Updated Makefile with Tilt commands (make tilt, make tilt-down)
   - Enables rapid development with instant code updates without rebuilds
   - All services managed through unified dashboard at http://localhost:10350
+
+### Sprint 2 Progress (July 23, 2025)
+- ✅ **MinIO/S3 Document Storage Implementation**: Cloud-native document storage
+  - Replaced local file storage with MinIO/S3 compatible storage
+  - Created comprehensive storage service with aioboto3
+  - Implemented user-isolated storage structure (user_id/unique_key.ext)
+  - Added document download endpoint with streaming response
+  - Implemented presigned URL generation for secure temporary access
+  - Added automatic bucket creation on startup
+  - Comprehensive error handling with automatic cleanup on failures
+  - Updated Docker Compose with MinIO environment variables
+  - Created storage service tests achieving 100% coverage
+  - Added MinIO-specific document API integration tests
+  - Successfully tested actual MinIO operations with test script
+  - Created .env.example with all configuration options
 
 ### What Exists
 - Complete PRD with technical specifications and architecture
@@ -98,8 +113,8 @@ The project has successfully completed Sprint 1 and achieved 84% test coverage w
   - Axios service layer with interceptors
 
 ### What Doesn't Exist Yet (Sprint 2 Focus)
+- **PDF Parsing**: Text extraction from uploaded documents
 - **AI Integration**: Anthropic Claude API for strategy extraction
-- **Document Processing**: MinIO upload and PDF parsing pipeline
 - **Event System**: RabbitMQ message queue implementation
 - **Backtesting**: Integration with backtesting frameworks
 - **Real-time Updates**: WebSocket implementation
@@ -300,31 +315,40 @@ None - implementation is progressing smoothly
 3. **Regulatory Compliance**: Financial services regulations vary by region
 4. **Competition**: Fast-moving space with well-funded competitors
 
-## Sprint 2 Priorities
+## Sprint 2 Current Status & Next Steps
 
-### Week 1-2: Document Processing
-- MinIO integration for file storage
-- PDF parsing and text extraction
-- Document metadata management
-- Upload API with progress tracking
+### Completed (July 23, 2025)
+- ✅ MinIO integration for file storage
+- ✅ Document upload/download API with streaming
+- ✅ Presigned URL generation
+- ✅ Comprehensive storage tests
 
-### Week 3-4: AI Integration
-- Anthropic Claude API setup
-- Strategy extraction prompts
-- Result parsing and validation
-- Caching and optimization
+### Next Priority: PDF Parsing Service
+1. **Text Extraction**:
+   - Implement PyPDF2 or pdfplumber for PDF parsing
+   - Handle various PDF formats and encodings
+   - Extract structured text and metadata
+   - Handle OCR requirements for scanned documents
 
-### Week 5-6: Event System
-- RabbitMQ queue setup
-- Worker processes
-- Event handlers
-- Error recovery
+2. **Document Processing Pipeline**:
+   - Create document processor service
+   - Implement async processing with progress tracking
+   - Add support for DOC/DOCX files
+   - Build metadata extraction (author, date, etc.)
 
-### Week 7-8: Backtesting & UI
-- Basic backtesting integration
-- Frontend features
-- Integration testing
-- Performance optimization
+3. **Integration Points**:
+   - Update document model with extracted text field
+   - Create processing status updates
+   - Implement error handling for malformed documents
+   - Add processing queue with RabbitMQ
+
+### Remaining Sprint 2 Tasks
+- [ ] PDF parsing and text extraction service
+- [ ] Anthropic Claude API integration
+- [ ] Document processing queue with RabbitMQ
+- [ ] WebSocket support for real-time updates
+- [ ] Basic backtesting framework integration
+- [ ] Document viewer UI component
 
 ## Development Guidelines
 - Continue TDD approach with high test coverage

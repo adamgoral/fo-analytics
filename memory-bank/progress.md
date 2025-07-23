@@ -304,14 +304,29 @@ None accumulated yet - clean slate for implementation
   - Fixed compatibility issues (Pydantic v2, model fields, imports)
   - Added .coveragerc to exclude example files from coverage
 
-### Sprint 2 Planning (Next Sprint - August 2025)
-1. [ ] Implement document upload to MinIO/S3
-2. [ ] Integrate Anthropic Claude API for strategy extraction
-3. [ ] Build document processing pipeline with RabbitMQ
-4. [ ] Create WebSocket support for real-time updates
-5. [ ] Implement basic backtesting integration
-6. [ ] Build interactive UI components for document viewer
-7. [ ] Add comprehensive error handling and recovery
+- ✅ **MinIO/S3 Document Storage Implementation**: (July 23, 2025)
+  - Implemented complete storage service with aioboto3
+  - Document upload endpoint now uses MinIO instead of local storage
+  - Added file download endpoint with streaming response
+  - Implemented presigned URL generation for secure temporary access
+  - Created user-isolated storage structure (user_id/unique_key.ext)
+  - Added comprehensive error handling and cleanup on failures
+  - Updated Docker Compose with MinIO environment variables
+  - Created storage service tests with 100% coverage
+  - Added MinIO integration tests for document API
+  - Successfully tested actual MinIO operations
+  - Created .env.example with all configuration options
+
+### Sprint 2 Status (July 23, 2025 - In Progress)
+1. [✓] Implement document upload to MinIO/S3 - COMPLETED (July 23)
+2. [ ] Create PDF parsing service for document text extraction
+3. [ ] Integrate Anthropic Claude API for strategy extraction
+4. [ ] Build document processing pipeline with RabbitMQ
+5. [ ] Create WebSocket support for real-time updates
+6. [ ] Implement basic backtesting integration
+7. [ ] Build interactive UI components for document viewer
+
+**Sprint Progress: 1 of 7 tasks completed (14%)**
 
 ### Success Criteria
 - ✅ Local development environment running

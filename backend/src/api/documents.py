@@ -4,8 +4,10 @@ import os
 from typing import List, Optional
 from datetime import datetime
 from pathlib import Path
+from io import BytesIO
 
 from fastapi import APIRouter, Depends, HTTPException, status, Query, UploadFile, File
+from fastapi.responses import StreamingResponse
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from core.auth import get_current_active_user
@@ -22,20 +24,13 @@ from schemas.document import (
     DocumentListResponse,
     DocumentProcessRequest
 )
+from services.storage import storage_service
 
 router = APIRouter(prefix="/documents", tags=["documents"])
 
-# Allowed file extensions and their MIME types
-ALLOWED_EXTENSIONS = {
-    ".pdf": "application/pdf",
-    ".doc": "application/msword",
-    ".docx": "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-    ".txt": "text/plain",
-    ".md": "text/markdown",
-}
-
-# Maximum file size (10MB)
-MAX_FILE_SIZE = 10 * 1024 * 1024
+# Use settings for allowed extensions and max file size
+ALLOWED_EXTENSIONS = {ext: None for ext in settings.allowed_file_extensions}
+MAX_FILE_SIZE = settings.max_upload_size
 
 
 @router.post("/upload", response_model=DocumentResponse, status_code=status.HTTP_201_CREATED)
@@ -48,24 +43,17 @@ async def upload_document(
     """
     Upload a new document for strategy extraction.
     
-    - **file**: The document file to upload (PDF, DOC, DOCX, TXT, MD)
+    - **file**: The document file to upload (PDF, TXT, DOC, DOCX)
     - **document_type**: Type of document being uploaded
     
-    Maximum file size: 10MB
+    Maximum file size configurable via MAX_UPLOAD_SIZE environment variable.
     """
     # Validate file extension
     file_extension = Path(file.filename).suffix.lower()
     if file_extension not in ALLOWED_EXTENSIONS:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail=f"File type {file_extension} not allowed. Allowed types: {', '.join(ALLOWED_EXTENSIONS.keys())}"
-        )
-    
-    # Validate MIME type
-    if file.content_type not in ALLOWED_EXTENSIONS.values():
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail=f"Invalid MIME type: {file.content_type}"
+            detail=f"File type {file_extension} not allowed. Allowed types: {', '.join(settings.allowed_file_extensions)}"
         )
     
     # Read file content to check size
@@ -75,43 +63,57 @@ async def upload_document(
     if file_size > MAX_FILE_SIZE:
         raise HTTPException(
             status_code=status.HTTP_413_REQUEST_ENTITY_TOO_LARGE,
-            detail=f"File size ({file_size} bytes) exceeds maximum allowed size ({MAX_FILE_SIZE} bytes)"
+            detail=f"File size ({file_size / (1024*1024):.1f}MB) exceeds maximum allowed size ({MAX_FILE_SIZE / (1024*1024):.1f}MB)"
         )
     
-    # Create storage directory if it doesn't exist
-    storage_dir = Path(settings.upload_dir) / str(current_user.id)
-    storage_dir.mkdir(parents=True, exist_ok=True)
+    # Ensure MinIO bucket exists
+    await storage_service.create_bucket_if_not_exists()
     
-    # Generate unique filename
-    timestamp = datetime.utcnow().strftime("%Y%m%d_%H%M%S")
-    safe_filename = f"{timestamp}_{file.filename}".replace(" ", "_")
-    storage_path = storage_dir / safe_filename
-    
-    # Save file to disk
+    # Upload file to MinIO
     try:
-        with open(storage_path, "wb") as f:
-            f.write(content)
+        # Create a BytesIO object from the content
+        file_content = BytesIO(content)
+        
+        # Upload to MinIO
+        storage_key = await storage_service.upload_file(
+            file_content=file_content,
+            file_name=file.filename,
+            content_type=file.content_type or "application/octet-stream",
+            user_id=str(current_user.id),
+            metadata={
+                "document_type": document_type,
+                "uploaded_at": datetime.utcnow().isoformat()
+            }
+        )
     except Exception as e:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Failed to save file: {str(e)}"
+            detail=f"Failed to upload file to storage: {str(e)}"
         )
     
     # Create document record
     document_data = DocumentCreate(
-        filename=safe_filename,
+        filename=Path(file.filename).name,
         original_filename=file.filename,
         document_type=document_type,
-        storage_path=str(storage_path),
+        storage_path=storage_key,  # Store MinIO key instead of local path
         file_size=file_size,
-        mime_type=file.content_type
+        mime_type=file.content_type or "application/octet-stream"
     )
     
     document_dict = document_data.model_dump()
     document_dict["uploaded_by_id"] = current_user.id
     document_dict["status"] = DocumentStatus.PENDING
     
-    document = await document_repo.create(**document_dict)
+    try:
+        document = await document_repo.create(**document_dict)
+    except Exception as e:
+        # If database creation fails, try to clean up the uploaded file
+        await storage_service.delete_file(storage_key)
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to create document record: {str(e)}"
+        )
     
     # TODO: Trigger document processing (e.g., send to queue)
     
@@ -185,6 +187,57 @@ async def get_document(
     return document
 
 
+@router.get("/{document_id}/download")
+async def download_document(
+    document_id: int,
+    current_user: User = Depends(get_current_active_user),
+    document_repo: DocumentRepository = Depends(get_document_repository),
+):
+    """
+    Download a document file.
+    
+    Requires authentication and ownership.
+    """
+    document = await document_repo.get(document_id)
+    
+    if not document:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Document not found"
+        )
+    
+    # Check ownership
+    if document.uploaded_by_id != current_user.id:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Not authorized to download this document"
+        )
+    
+    try:
+        # Download file from MinIO
+        file_content, metadata = await storage_service.download_file(document.storage_path)
+        
+        # Return file as streaming response
+        return StreamingResponse(
+            BytesIO(file_content),
+            media_type=metadata.get('ContentType', document.mime_type),
+            headers={
+                "Content-Disposition": f'attachment; filename="{document.original_filename}"',
+                "Content-Length": str(metadata.get('ContentLength', len(file_content)))
+            }
+        )
+    except FileNotFoundError:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="File not found in storage"
+        )
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to download file: {str(e)}"
+        )
+
+
 @router.patch("/{document_id}", response_model=DocumentResponse)
 async def update_document(
     document_id: int,
@@ -245,13 +298,13 @@ async def delete_document(
             detail="Not authorized to delete this document"
         )
     
-    # Delete file from disk
+    # Delete file from MinIO
     try:
-        if os.path.exists(document.storage_path):
-            os.remove(document.storage_path)
+        await storage_service.delete_file(document.storage_path)
     except Exception as e:
         # Log error but don't fail the deletion
-        print(f"Failed to delete file {document.storage_path}: {str(e)}")
+        # In production, this should use proper logging
+        print(f"Failed to delete file {document.storage_path} from MinIO: {str(e)}")
     
     # Delete document record
     await document_repo.delete(document_id)

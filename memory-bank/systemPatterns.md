@@ -135,12 +135,34 @@ The platform follows a microservices architecture pattern with clear service bou
 
 ## Service Responsibilities
 
-### Document Service
-- **Primary Responsibility**: PDF storage and retrieval
+### Document Service (✅ Storage Layer Implemented July 23, 2025)
+- **Primary Responsibility**: Document storage, retrieval, and processing
+- **Implemented Components**:
+  - ✅ MinIO/S3 storage service with aioboto3
+  - ✅ User-isolated storage structure (user_id/unique_key.ext)
+  - ✅ Streaming download with presigned URLs
+  - ✅ Automatic bucket creation and management
+  - ✅ Comprehensive error handling and cleanup
 - **Key Patterns**:
-  - Facade pattern for storage abstraction
-  - Strategy pattern for different file processors
-  - Chain of responsibility for validation pipeline
+  - **Storage Abstraction**: StorageService wraps S3 operations
+  - **Factory Pattern**: Configurable storage backends (MinIO/S3/Azure)
+  - **Repository Pattern**: Document metadata in PostgreSQL
+  - **Strategy Pattern**: Different file processors (PDF, DOC, TXT)
+  - **Chain of Responsibility**: Validation pipeline
+- **Storage Architecture**:
+  ```python
+  # Storage service interface
+  class StorageService:
+      async def upload_file(file_content, file_name, user_id) -> str
+      async def download_file(file_key) -> (bytes, metadata)
+      async def delete_file(file_key) -> bool
+      async def generate_presigned_url(file_key) -> str
+      async def list_user_files(user_id) -> List[dict]
+  
+  # Document flow
+  Upload → Validate → Store in MinIO → Save metadata → Return key
+  Download → Verify ownership → Generate URL/Stream → Return content
+  ```
 
 ### AI Service
 - **Primary Responsibility**: LLM integration and strategy extraction

@@ -49,6 +49,47 @@ class Settings(BaseSettings):
         description="Directory for uploaded files"
     )
     
+    # MinIO/S3 Configuration
+    minio_endpoint: str = Field(
+        default="localhost:9000",
+        description="MinIO/S3 endpoint"
+    )
+    
+    minio_access_key: str = Field(
+        default="minioadmin",
+        description="MinIO/S3 access key"
+    )
+    
+    minio_secret_key: str = Field(
+        default="minioadmin",
+        description="MinIO/S3 secret key"
+    )
+    
+    minio_bucket_name: str = Field(
+        default="fo-analytics-documents",
+        description="MinIO/S3 bucket name for document storage"
+    )
+    
+    minio_use_ssl: bool = Field(
+        default=False,
+        description="Use SSL for MinIO/S3 connection"
+    )
+    
+    minio_region: str = Field(
+        default="us-east-1",
+        description="MinIO/S3 region"
+    )
+    
+    max_upload_size: int = Field(
+        default=100 * 1024 * 1024,  # 100MB
+        description="Maximum file upload size in bytes"
+    )
+    
+    allowed_file_extensions: list[str] = Field(
+        default=[".pdf", ".txt", ".doc", ".docx"],
+        description="Allowed file extensions for upload"
+    )
+    
     model_config = SettingsConfigDict(
         env_file=".env",
         env_file_encoding="utf-8",
