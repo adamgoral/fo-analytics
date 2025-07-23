@@ -1,7 +1,6 @@
 """Backtest repository with backtest-specific operations."""
 
-from typing import List, Optional
-from uuid import UUID
+from typing import List, Optional, Union
 
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -17,7 +16,7 @@ class BacktestRepository(BaseRepository[Backtest]):
         super().__init__(Backtest, session)
 
     async def get_by_strategy(
-        self, strategy_id: UUID, skip: int = 0, limit: int = 100
+        self, strategy_id: int, skip: int = 0, limit: int = 100
     ) -> List[Backtest]:
         """Get all backtests for a specific strategy."""
         result = await self.session.execute(
@@ -52,13 +51,13 @@ class BacktestRepository(BaseRepository[Backtest]):
         return await self.get_by_status("running", limit)
 
     async def update_status(
-        self, backtest_id: UUID, status: str
+        self, backtest_id: Union[int, str], status: str
     ) -> Optional[Backtest]:
         """Update backtest status."""
         return await self.update(backtest_id, status=status)
 
     async def mark_as_completed(
-        self, backtest_id: UUID, metrics: dict
+        self, backtest_id: Union[int, str], metrics: dict
     ) -> Optional[Backtest]:
         """Mark backtest as completed with metrics."""
         return await self.update(
@@ -68,7 +67,7 @@ class BacktestRepository(BaseRepository[Backtest]):
         )
 
     async def mark_as_failed(
-        self, backtest_id: UUID, error: str
+        self, backtest_id: Union[int, str], error: str
     ) -> Optional[Backtest]:
         """Mark backtest as failed with error message."""
         return await self.update(
@@ -76,3 +75,15 @@ class BacktestRepository(BaseRepository[Backtest]):
             status="failed",
             metrics={"error": error}
         )
+    
+    async def get_by_user(
+        self, user_id: int, skip: int = 0, limit: int = 100
+    ) -> List[Backtest]:
+        """Get all backtests for a specific user."""
+        result = await self.session.execute(
+            select(Backtest)
+            .where(Backtest.created_by_id == user_id)
+            .offset(skip)
+            .limit(limit)
+        )
+        return list(result.scalars().all())

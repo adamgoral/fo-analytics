@@ -1,7 +1,6 @@
 """Base repository with common CRUD operations."""
 
-from typing import Generic, List, Optional, Type, TypeVar
-from uuid import UUID
+from typing import Generic, List, Optional, Type, TypeVar, Union
 
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -18,7 +17,7 @@ class BaseRepository(Generic[ModelType]):
         self.model = model
         self.session = session
 
-    async def get(self, id: UUID) -> Optional[ModelType]:
+    async def get(self, id: Union[int, str]) -> Optional[ModelType]:
         """Get a single record by ID."""
         result = await self.session.execute(
             select(self.model).where(self.model.id == id)
@@ -42,7 +41,7 @@ class BaseRepository(Generic[ModelType]):
         await self.session.refresh(db_obj)
         return db_obj
 
-    async def update(self, id: UUID, **kwargs) -> Optional[ModelType]:
+    async def update(self, id: Union[int, str], **kwargs) -> Optional[ModelType]:
         """Update an existing record."""
         db_obj = await self.get(id)
         if not db_obj:
@@ -55,7 +54,7 @@ class BaseRepository(Generic[ModelType]):
         await self.session.refresh(db_obj)
         return db_obj
 
-    async def delete(self, id: UUID) -> bool:
+    async def delete(self, id: Union[int, str]) -> bool:
         """Delete a record by ID."""
         db_obj = await self.get(id)
         if not db_obj:
@@ -65,7 +64,7 @@ class BaseRepository(Generic[ModelType]):
         await self.session.commit()
         return True
 
-    async def exists(self, id: UUID) -> bool:
+    async def exists(self, id: Union[int, str]) -> bool:
         """Check if a record exists by ID."""
         result = await self.session.execute(
             select(self.model.id).where(self.model.id == id)

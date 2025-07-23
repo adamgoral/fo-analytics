@@ -1,0 +1,17 @@
+[run]
+source = src
+omit = 
+    src/utils/logging_config_example.py
+    src/alembic/*
+    */tests/*
+    */__pycache__/*
+    */venv/*
+    */.venv/*
+
+[report]
+precision = 0
+show_missing = True
+skip_covered = False
+
+[html]
+directory = htmlcov
