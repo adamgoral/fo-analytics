@@ -8,9 +8,8 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from .database import get_db
 from .security import verify_token
-from ..models.user import User
-from ..repositories.user import UserRepository
-from ..repositories.uow import UnitOfWork
+from models.user import User
+from repositories.user import UserRepository
 
 
 security = HTTPBearer()
@@ -43,24 +42,23 @@ async def get_current_user(
             headers={"WWW-Authenticate": "Bearer"},
         )
     
-    async with UnitOfWork(db) as uow:
-        user_repo = UserRepository(db)
-        user = await user_repo.get(token_payload.sub)
-        
-        if not user:
-            raise HTTPException(
-                status_code=status.HTTP_401_UNAUTHORIZED,
-                detail="User not found",
-                headers={"WWW-Authenticate": "Bearer"},
-            )
-        
-        if not user.is_active:
-            raise HTTPException(
-                status_code=status.HTTP_403_FORBIDDEN,
-                detail="Inactive user"
-            )
-        
-        return user
+    user_repo = UserRepository(db)
+    user = await user_repo.get(token_payload.sub)
+    
+    if not user:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="User not found",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+    
+    if not user.is_active:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Inactive user"
+        )
+    
+    return user
 
 
 async def get_current_active_user(

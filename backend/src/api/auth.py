@@ -3,10 +3,10 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from ..core.auth import get_current_active_user
-from ..core.database import get_db
-from ..models.user import User
-from ..schemas.auth import (
+from core.auth import get_current_active_user
+from core.database import get_db
+from models.user import User
+from schemas.auth import (
     UserCreate,
     UserLogin,
     UserResponse,
@@ -15,8 +15,8 @@ from ..schemas.auth import (
     ChangePasswordRequest,
     MessageResponse
 )
-from ..services.auth_service import AuthService
-from ..utils.logging import logger, set_user_context
+from services.auth_service import AuthService
+from utils.logging import logger, set_user_context
 
 
 router = APIRouter(prefix="/auth", tags=["authentication"])
@@ -91,7 +91,7 @@ async def login(
             access_token=tokens.access_token,
             refresh_token=tokens.refresh_token,
             token_type=tokens.token_type,
-            user=UserResponse.from_orm(user)
+            user=UserResponse.model_validate(user)
         )
     except ValueError as e:
         logger.warning(
@@ -128,7 +128,7 @@ async def refresh_token(
         )
     
     # Get user for response
-    from ..core.security import verify_token
+    from core.security import verify_token
     token_payload = verify_token(refresh_request.refresh_token, token_type="refresh")
     user = await auth_service.user_repo.get(token_payload.sub)
     
@@ -136,7 +136,7 @@ async def refresh_token(
         access_token=tokens.access_token,
         refresh_token=tokens.refresh_token,
         token_type=tokens.token_type,
-        user=UserResponse.from_orm(user)
+        user=UserResponse.model_validate(user)
     )
 
 

@@ -59,7 +59,7 @@ def create_access_token(
         expire = datetime.now(timezone.utc) + expires_delta
     else:
         expire = datetime.now(timezone.utc) + timedelta(
-            minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES
+            minutes=settings.access_token_expire_minutes
         )
     
     to_encode = {
@@ -72,8 +72,8 @@ def create_access_token(
     
     encoded_jwt = jwt.encode(
         to_encode,
-        settings.SECRET_KEY,
-        algorithm=settings.ALGORITHM
+        settings.secret_key,
+        algorithm=settings.algorithm
     )
     return encoded_jwt
 
@@ -98,7 +98,7 @@ def create_refresh_token(
         expire = datetime.now(timezone.utc) + expires_delta
     else:
         expire = datetime.now(timezone.utc) + timedelta(
-            days=settings.REFRESH_TOKEN_EXPIRE_DAYS
+            days=settings.refresh_token_expire_days
         )
     
     to_encode = {
@@ -111,8 +111,8 @@ def create_refresh_token(
     
     encoded_jwt = jwt.encode(
         to_encode,
-        settings.SECRET_KEY,
-        algorithm=settings.ALGORITHM
+        settings.secret_key,
+        algorithm=settings.algorithm
     )
     return encoded_jwt
 
@@ -131,8 +131,8 @@ def verify_token(token: str, token_type: str = "access") -> Optional[TokenPayloa
     try:
         payload = jwt.decode(
             token,
-            settings.SECRET_KEY,
-            algorithms=[settings.ALGORITHM]
+            settings.secret_key,
+            algorithms=[settings.algorithm]
         )
         
         if payload.get("type") != token_type:

@@ -2,7 +2,6 @@
 
 from datetime import datetime
 from typing import Optional
-from uuid import UUID
 
 from pydantic import BaseModel, EmailStr, Field
 
@@ -23,16 +22,17 @@ class UserLogin(BaseModel):
 
 class UserResponse(BaseModel):
     """Schema for user response."""
-    id: UUID
-    name: str
+    id: int
+    full_name: str
+    username: str
     email: EmailStr
     role: str
     is_active: bool
+    is_verified: bool
     created_at: datetime
     updated_at: datetime
     
-    class Config:
-        from_attributes = True
+    model_config = {"from_attributes": True}
 
 
 class TokenResponse(BaseModel):

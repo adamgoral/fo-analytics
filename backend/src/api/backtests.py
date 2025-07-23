@@ -6,14 +6,14 @@ from datetime import datetime
 from fastapi import APIRouter, Depends, HTTPException, status, Query
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from ..core.auth import get_current_active_user
-from ..core.database import get_db
-from ..core.dependencies import get_backtest_repository, get_strategy_repository
-from ..models.user import User
-from ..models.backtest import BacktestStatus
-from ..repositories.backtest import BacktestRepository
-from ..repositories.strategy import StrategyRepository
-from ..schemas.backtest import (
+from core.auth import get_current_active_user
+from core.database import get_db
+from core.dependencies import get_backtest_repository, get_strategy_repository
+from models.user import User
+from models.backtest import BacktestStatus
+from repositories.backtest import BacktestRepository
+from repositories.strategy import StrategyRepository
+from schemas.backtest import (
     BacktestCreate,
     BacktestUpdate,
     BacktestResponse,
@@ -80,7 +80,7 @@ async def list_backtests(
     """
     # Base query for user's backtests
     from sqlalchemy import select, func
-    from ..models.backtest import Backtest
+    from models.backtest import Backtest
     
     query = select(Backtest).where(Backtest.created_by_id == current_user.id)
     count_query = select(func.count(Backtest.id)).where(Backtest.created_by_id == current_user.id)

@@ -6,7 +6,7 @@ from uuid import UUID
 
 from pydantic import BaseModel, Field, ConfigDict
 
-from ..models.strategy import StrategyStatus, AssetClass
+from models.strategy import StrategyStatus, AssetClass
 
 
 class StrategyBase(BaseModel):

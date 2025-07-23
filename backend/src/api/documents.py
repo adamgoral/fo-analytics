@@ -8,14 +8,14 @@ from pathlib import Path
 from fastapi import APIRouter, Depends, HTTPException, status, Query, UploadFile, File
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from ..core.auth import get_current_active_user
-from ..core.database import get_db
-from ..core.dependencies import get_document_repository
-from ..core.config import settings
-from ..models.user import User
-from ..models.document import DocumentStatus, DocumentType
-from ..repositories.document import DocumentRepository
-from ..schemas.document import (
+from core.auth import get_current_active_user
+from core.database import get_db
+from core.dependencies import get_document_repository
+from core.config import settings
+from models.user import User
+from models.document import DocumentStatus, DocumentType
+from repositories.document import DocumentRepository
+from schemas.document import (
     DocumentCreate,
     DocumentUpdate,
     DocumentResponse,

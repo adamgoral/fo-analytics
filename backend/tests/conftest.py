@@ -5,10 +5,13 @@ from typing import AsyncGenerator
 
 import pytest
 import pytest_asyncio
+from httpx import AsyncClient
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
 from sqlalchemy.orm import sessionmaker
 
 from core.config import settings
+from core.database import get_db
+from main import app
 from models.base import Base
 
 # Use SQLite for testing
@@ -42,3 +45,20 @@ async def async_session() -> AsyncGenerator[AsyncSession, None]:
     
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.drop_all)
+
+
+@pytest_asyncio.fixture
+async def async_client(async_session: AsyncSession) -> AsyncGenerator[AsyncClient, None]:
+    """Create an async test client."""
+    async def override_get_db():
+        yield async_session
+    
+    app.dependency_overrides[get_db] = override_get_db
+    
+    from httpx import ASGITransport
+    transport = ASGITransport(app=app)
+    
+    async with AsyncClient(transport=transport, base_url="http://test") as client:
+        yield client
+    
+    app.dependency_overrides.clear()

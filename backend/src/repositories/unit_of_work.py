@@ -4,7 +4,7 @@ from typing import Optional
 
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from core.database import AsyncSessionLocal
+from core.database import async_session_maker
 from repositories.backtest import BacktestRepository
 from repositories.document import DocumentRepository
 from repositories.strategy import StrategyRepository
@@ -23,7 +23,8 @@ class UnitOfWork:
 
     async def __aenter__(self):
         """Enter the async context manager."""
-        self._session = AsyncSessionLocal()
+        self._session = async_session_maker()
+        await self._session.__aenter__()
         self.users = UserRepository(self._session)
         self.documents = DocumentRepository(self._session)
         self.strategies = StrategyRepository(self._session)
@@ -34,7 +35,7 @@ class UnitOfWork:
         """Exit the async context manager."""
         if exc_type:
             await self.rollback()
-        await self._session.close()
+        await self._session.__aexit__(exc_type, exc_val, exc_tb)
 
     async def commit(self):
         """Commit the transaction."""

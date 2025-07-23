@@ -5,7 +5,7 @@ from typing import Dict, List, Optional
 
 from pydantic import BaseModel, Field, ConfigDict
 
-from ..models.backtest import BacktestStatus, BacktestProvider
+from models.backtest import BacktestStatus, BacktestProvider
 
 
 class BacktestBase(BaseModel):

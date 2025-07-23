@@ -5,7 +5,7 @@ from typing import Dict, List, Optional
 
 from pydantic import BaseModel, Field, ConfigDict
 
-from ..models.document import DocumentType, DocumentStatus
+from models.document import DocumentType, DocumentStatus
 
 
 class DocumentBase(BaseModel):

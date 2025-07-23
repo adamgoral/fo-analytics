@@ -6,13 +6,13 @@ from uuid import UUID
 from fastapi import APIRouter, Depends, HTTPException, status, Query
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from ..core.auth import get_current_active_user
-from ..core.database import get_db
-from ..core.dependencies import get_strategy_repository
-from ..models.user import User
-from ..models.strategy import StrategyStatus
-from ..repositories.strategy import StrategyRepository
-from ..schemas.strategy import (
+from core.auth import get_current_active_user
+from core.database import get_db
+from core.dependencies import get_strategy_repository
+from models.user import User
+from models.strategy import StrategyStatus
+from repositories.strategy import StrategyRepository
+from schemas.strategy import (
     StrategyCreate,
     StrategyUpdate,
     StrategyResponse,

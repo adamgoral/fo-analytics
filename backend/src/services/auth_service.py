@@ -4,17 +4,16 @@ from typing import Optional
 
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from ..core.security import (
+from core.security import (
     create_token_pair,
     get_password_hash,
     verify_password,
     verify_token,
     TokenData
 )
-from ..models.user import User
-from ..repositories.user import UserRepository
-from ..repositories.uow import UnitOfWork
-from ..schemas.auth import UserCreate, UserLogin
+from models.user import User
+from repositories.user import UserRepository
+from schemas.auth import UserCreate, UserLogin
 
 
 class AuthService:
@@ -37,25 +36,23 @@ class AuthService:
         Raises:
             ValueError: If email already exists
         """
-        async with UnitOfWork(self.db) as uow:
-            existing_user = await self.user_repo.get_by_email(user_data.email)
-            if existing_user:
-                raise ValueError("Email already registered")
-            
-            hashed_password = get_password_hash(user_data.password)
-            
-            user = User(
-                name=user_data.name,
-                email=user_data.email,
-                hashed_password=hashed_password,
-                role=user_data.role or "viewer",
-                is_active=True
-            )
-            
-            created_user = await self.user_repo.create(user)
-            await uow.commit()
-            
-            return created_user
+        existing_user = await self.user_repo.get_by_email(user_data.email)
+        if existing_user:
+            raise ValueError("Email already registered")
+        
+        hashed_password = get_password_hash(user_data.password)
+        
+        created_user = await self.user_repo.create(
+            full_name=user_data.name,
+            username=user_data.email.split('@')[0],  # Use email prefix as username
+            email=user_data.email,
+            hashed_password=hashed_password,
+            role=user_data.role or "viewer",
+            is_active=True,
+            is_verified=True  # Auto-verify for now
+        )
+        
+        return created_user
     
     async def login(self, login_data: UserLogin) -> tuple[User, TokenData]:
         """
@@ -78,7 +75,7 @@ class AuthService:
         if not user.is_active:
             raise ValueError("User account is inactive")
         
-        tokens = create_token_pair(str(user.id), user.role)
+        tokens = create_token_pair(str(user.id), user.role.value)
         
         return user, tokens
     
@@ -102,7 +99,7 @@ class AuthService:
         if not user or not user.is_active:
             return None
         
-        return create_token_pair(str(user.id), user.role)
+        return create_token_pair(str(user.id), user.role.value)
     
     async def change_password(
         self,
@@ -121,14 +118,12 @@ class AuthService:
         Returns:
             True if successful, False otherwise
         """
-        async with UnitOfWork(self.db) as uow:
-            user = await self.user_repo.get(user_id)
-            
-            if not user or not verify_password(current_password, user.hashed_password):
-                return False
-            
-            user.hashed_password = get_password_hash(new_password)
-            await self.user_repo.update(user)
-            await uow.commit()
-            
-            return True
+        user = await self.user_repo.get(user_id)
+        
+        if not user or not verify_password(current_password, user.hashed_password):
+            return False
+        
+        user.hashed_password = get_password_hash(new_password)
+        await self.user_repo.update(user_id, hashed_password=user.hashed_password)
+        
+        return True
