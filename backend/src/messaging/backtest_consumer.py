@@ -9,9 +9,8 @@ from aio_pika import IncomingMessage
 from core.database import get_db
 # from repositories.unit_of_work import UnitOfWork  # TODO: Implement
 from services.backtesting import BacktestingService
-from websocket_manager import WebSocketNotifier
-from .connection import get_connection_manager
-from .schemas import ProcessingMode
+from api.websockets import WebSocketNotifier
+from .connection import get_rabbitmq_connection
 from .backtest_schemas import BacktestMessage
 
 logger = structlog.get_logger(__name__)
@@ -21,15 +20,15 @@ class BacktestConsumer:
     """Consumes backtest messages from RabbitMQ and processes them."""
     
     def __init__(self):
-        self.connection_manager = get_connection_manager()
+        self.connection = None
         self.notifier = WebSocketNotifier()
         self.processing = False
     
     async def start(self) -> None:
         """Start consuming messages from the backtest queue."""
         try:
-            await self.connection_manager.connect()
-            channel = await self.connection_manager.get_channel()
+            self.connection = await get_rabbitmq_connection()
+            channel = await self.connection.get_channel()
             
             # Declare backtest queue
             queue = await channel.declare_queue(

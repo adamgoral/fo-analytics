@@ -125,7 +125,17 @@
 - **Monitoring**: Prometheus/Grafana stack not configured
 
 ## Known Issues
-None at this stage - project is in pre-implementation phase
+
+### Current Issues (July 24, 2025)
+1. **Worker Service API Keys**: Worker service requires `ANTHROPIC_API_KEY` environment variable to be set for full functionality. This is expected behavior but needs to be configured for production use.
+2. **Docker Compose Version Warning**: The `version` attribute in docker-compose.yml is obsolete and generates warnings. Can be removed but doesn't affect functionality.
+3. **Database Migration Pending**: New Strategy model fields (code, code_language) need migration to be run for strategy code editor functionality.
+
+### Recently Resolved Issues (July 24, 2025)
+- ✅ Worker service crash due to missing storage_service argument - FIXED
+- ✅ Backtest worker import errors - FIXED
+- ✅ Tilt development environment startup failures - FIXED
+- ✅ 30+ Python import errors throughout codebase - FIXED
 
 ## Technical Debt
 None accumulated yet - clean slate for implementation
@@ -281,6 +291,10 @@ None accumulated yet - clean slate for implementation
 48. **Service Port Documentation**: Frontend runs on port 5173 (Vite default), not 3000
 49. **Tilt Environment Recovery**: Fixed 30+ import errors and configuration issues to restore development environment
 50. **Docker Volume Management**: Fixed container conflicts by adding anonymous volumes for .venv directories
+51. **Worker Service Dependencies**: DocumentParserService requires storage_service instance in constructor
+52. **Import Path Corrections**: WebSocketNotifier should be imported from `api.websockets`, not `websocket_manager`
+53. **RabbitMQ Connection Pattern**: Use `get_rabbitmq_connection()` function, not `get_connection_manager()`
+54. **Schema Import Cleanup**: Remove imports for non-existent schemas (e.g., ProcessingMode) to prevent import errors
 
 ## Risk Register
 

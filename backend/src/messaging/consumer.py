@@ -29,7 +29,7 @@ class DocumentProcessingConsumer:
         self._connection = None
         self._publisher = MessagePublisher()
         self._storage_service = StorageService()
-        self._parser_service = DocumentParserService()
+        self._parser_service = DocumentParserService(self._storage_service)
         self._llm_service = LLMService()
         self._running = False
         
