@@ -274,7 +274,11 @@ asyncio_mode = "auto"
     "@mui/material": "^5.15.0",
     "react-hook-form": "^7.48.0",
     "react-query": "^3.39.0",
-    "recharts": "^2.10.0"
+    "recharts": "^2.10.0",
+    "@monaco-editor/react": "^4.6.0",
+    "html2canvas": "^1.4.1",
+    "date-fns": "^3.6.0",
+    "date-fns-tz": "^3.1.3"
   },
   "devDependencies": {
     "@types/react": "^18.2.0",

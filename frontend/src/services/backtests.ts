@@ -29,6 +29,7 @@ export interface BacktestResult {
     sharpe_ratio: number;
     sortino_ratio: number;
     max_drawdown: number;
+    max_drawdown_duration?: number;
     win_rate: number;
     profit_factor: number;
     total_trades: number;
@@ -38,8 +39,13 @@ export interface BacktestResult {
     avg_loss: number;
     best_trade: number;
     worst_trade: number;
-    equity_curve: Array<{ date: string; value: number }>;
-    drawdown_curve: Array<{ date: string; value: number }>;
+    equity_curve?: Array<{
+      date: string;
+      equity: number;
+      benchmark_equity?: number;
+      drawdown: number;
+      drawdown_duration?: number;
+    }>;
     trades: Array<{
       entry_date: string;
       exit_date: string;

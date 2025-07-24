@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import {
   Box,
   Paper,
@@ -18,15 +18,18 @@ import {
   IconButton,
   Tooltip,
   Grid,
+  Divider,
 } from '@mui/material';
 import {
   TrendingUp as TrendingUpIcon,
   TrendingDown as TrendingDownIcon,
   Download as DownloadIcon,
   Refresh as RefreshIcon,
+  ShowChart as ShowChartIcon,
 } from '@mui/icons-material';
 import { backtestsApi } from '../../services/backtests';
 import type { BacktestResult } from '../../services/backtests';
+import { EquityChart, DrawdownChart } from '../../components/Charts';
 
 
 interface BacktestResultsProps {
@@ -38,6 +41,7 @@ const BacktestResults: React.FC<BacktestResultsProps> = ({ backtestId }) => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [showAllTrades, setShowAllTrades] = useState(false);
+  const [showCharts, setShowCharts] = useState(true);
 
   useEffect(() => {
     loadBacktestResults();
@@ -89,6 +93,27 @@ const BacktestResults: React.FC<BacktestResultsProps> = ({ backtestId }) => {
     }
   };
 
+  // Prepare chart data
+  const { equityData, drawdownData } = useMemo(() => {
+    if (!backtest?.results?.equity_curve) {
+      return { equityData: [], drawdownData: [] };
+    }
+
+    const equityData = backtest.results.equity_curve.map((point: any) => ({
+      date: point.date,
+      equity: point.equity,
+      benchmark: point.benchmark_equity,
+    }));
+
+    const drawdownData = backtest.results.equity_curve.map((point: any) => ({
+      date: point.date,
+      drawdown: point.drawdown * 100, // Convert to percentage
+      duration: point.drawdown_duration,
+    }));
+
+    return { equityData, drawdownData };
+  }, [backtest]);
+
   if (loading) {
     return (
       <Box sx={{ p: 3 }}>
@@ -133,6 +158,11 @@ const BacktestResults: React.FC<BacktestResultsProps> = ({ backtestId }) => {
             </Typography>
           </Box>
           <Box sx={{ display: 'flex', gap: 1 }}>
+            <Tooltip title="Toggle Charts">
+              <IconButton onClick={() => setShowCharts(!showCharts)}>
+                <ShowChartIcon />
+              </IconButton>
+            </Tooltip>
             <Tooltip title="Export Results">
               <IconButton onClick={exportResults} disabled={!backtest.results}>
                 <DownloadIcon />
@@ -171,6 +201,34 @@ const BacktestResults: React.FC<BacktestResultsProps> = ({ backtestId }) => {
 
       {backtest.results && (
         <>
+          {/* Charts */}
+          {showCharts && equityData.length > 0 && (
+            <Box sx={{ mb: 4 }}>
+              <Grid container spacing={3}>
+                <Grid item xs={12} lg={8}>
+                  <Paper variant="outlined" sx={{ p: 3 }}>
+                    <EquityChart
+                      data={equityData}
+                      showBenchmark={equityData[0]?.benchmark !== undefined}
+                      height={350}
+                    />
+                  </Paper>
+                </Grid>
+                <Grid item xs={12} lg={4}>
+                  <Paper variant="outlined" sx={{ p: 3 }}>
+                    <DrawdownChart
+                      data={drawdownData}
+                      maxDrawdown={backtest.results.max_drawdown * 100}
+                      maxDrawdownDuration={backtest.results.max_drawdown_duration}
+                      height={350}
+                    />
+                  </Paper>
+                </Grid>
+              </Grid>
+              <Divider sx={{ my: 3 }} />
+            </Box>
+          )}
+
           {/* Key Metrics */}
           <Grid container spacing={3} sx={{ mb: 4 }}>
             <Grid item xs={12} sm={6} md={3}>

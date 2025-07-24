@@ -293,8 +293,14 @@ The project has successfully completed Sprint 2 with all planned features delive
      - Created API endpoint PUT /strategies/{id}/code for updating strategy code
      - Integrated into StrategiesPage with "View Code" functionality
      - Note: Database migration for new fields needs to be run
+   - ✅ Interactive charting with Recharts - COMPLETED (July 24, 2025)
+     - Implemented EquityChart component for strategy performance visualization
+     - Created DrawdownChart component for risk analysis
+     - Built PerformanceComparison component for multi-strategy analysis
+     - Added chart export functionality (PNG and CSV)
+     - Integrated charts into BacktestResults with toggle functionality
+     - Comprehensive test coverage (48 tests, 94.82% coverage for chartExport)
    - Custom indicator builder with visual programming
-   - Interactive charting with TradingView or similar
    - Portfolio analytics dashboard with drill-down
    - Strategy comparison and A/B testing interface
 
@@ -535,6 +541,44 @@ All Sprint 2 tasks have been successfully completed:
   - Toast notifications for important events
 
 ## Sprint 3 Progress (July 24, 2025 - In Progress)
+
+### Interactive Charting Implementation ✅ COMPLETE (July 24, 2025)
+- ✅ **Chart Components**:
+  - **EquityChart**: Line chart showing portfolio value over time
+    - Support for benchmark comparison
+    - Interactive tooltips with formatted values
+    - Export to PNG and CSV functionality
+    - Responsive design with customizable height
+  - **DrawdownChart**: Area chart visualizing portfolio drawdowns
+    - Color-coded severity levels
+    - Max drawdown and duration metrics display
+    - Gradient fill for positive/negative regions
+    - Export functionality
+  - **PerformanceComparison**: Multi-chart comparison view
+    - Bar chart for key metrics comparison
+    - Radar chart for strategy profile visualization
+    - Responsive grid layout
+- ✅ **Integration Features**:
+  - Seamless integration with BacktestResults component
+  - Toggle button to show/hide charts
+  - Automatic data transformation from API responses
+  - Real-time chart updates with backtest data
+- ✅ **Export Utilities**:
+  - PNG export using html2canvas library
+  - CSV export with proper formatting and escaping
+  - Error handling for export failures
+- ✅ **Test Coverage**:
+  - 48 tests passing across 7 test files
+  - chartExport.ts: 94.82% statement coverage
+  - DrawdownChart: 77.84% statement coverage
+  - EquityChart: 70.51% statement coverage
+  - PerformanceComparison: 84.07% statement coverage
+  - Integration tests for BacktestResults
+  - Error handling and edge case tests
+- ✅ **Dependencies Added**:
+  - recharts: Main charting library
+  - html2canvas: For PNG export functionality
+  - date-fns-tz: Timezone support for date formatting
 
 ### AI Chat Interface Implementation ✅ COMPLETE (Backend + Frontend)
 - ✅ **Database Models**: Created ChatSession and ChatMessage models with proper relationships
