@@ -9,7 +9,7 @@ import structlog
 
 from core.config import settings
 from .connection import get_rabbitmq_connection
-from .schemas import DocumentProcessingMessage, ProcessingResultMessage
+from .schemas import DocumentProcessingMessage, ProcessingResultMessage, BacktestExecutionMessage
 
 logger = structlog.get_logger(__name__)
 
@@ -99,6 +99,77 @@ class MessagePublisher:
             )
             raise
             
+    async def publish_backtest_execution(
+        self,
+        backtest_id: int,
+        user_id: UUID,
+        strategy_id: int,
+        strategy_name: str,
+        strategy_code: str,
+        parameters: Dict[str, Any],
+        correlation_id: Optional[UUID] = None
+    ) -> UUID:
+        """
+        Publish a backtest execution message.
+        
+        Args:
+            backtest_id: ID of the backtest to execute
+            user_id: ID of the user who created the backtest
+            strategy_id: ID of the strategy
+            strategy_name: Name of the strategy
+            strategy_code: Strategy code to execute
+            parameters: Backtest parameters
+            correlation_id: Optional correlation ID for tracking
+            
+        Returns:
+            Message ID
+        """
+        await self._ensure_connection()
+        
+        message_id = uuid4()
+        message = BacktestExecutionMessage(
+            message_id=message_id,
+            correlation_id=correlation_id,
+            backtest_id=backtest_id,
+            user_id=user_id,
+            strategy_id=strategy_id,
+            strategy_name=strategy_name,
+            strategy_code=strategy_code,
+            parameters=parameters
+        )
+        
+        try:
+            exchange = await self._connection.get_exchange()
+            
+            # Publish to backtest queue
+            await exchange.publish(
+                aio_pika.Message(
+                    body=message.model_dump_json().encode(),
+                    content_type="application/json",
+                    delivery_mode=aio_pika.DeliveryMode.PERSISTENT,
+                    message_id=str(message_id),
+                    correlation_id=str(correlation_id) if correlation_id else None,
+                ),
+                routing_key="backtest.execute"
+            )
+            
+            logger.info(
+                "Published backtest execution message",
+                message_id=str(message_id),
+                backtest_id=backtest_id,
+                strategy_id=strategy_id
+            )
+            
+            return message_id
+            
+        except Exception as e:
+            logger.error(
+                "Failed to publish backtest execution message",
+                error=str(e),
+                backtest_id=backtest_id
+            )
+            raise
+            
     async def publish_processing_result(
         self,
         document_id: UUID,
@@ -166,6 +237,77 @@ class MessagePublisher:
                 "Failed to publish processing result message",
                 error=str(e),
                 document_id=str(document_id)
+            )
+            raise
+            
+    async def publish_backtest_execution(
+        self,
+        backtest_id: int,
+        user_id: UUID,
+        strategy_id: int,
+        strategy_name: str,
+        strategy_code: str,
+        parameters: Dict[str, Any],
+        correlation_id: Optional[UUID] = None
+    ) -> UUID:
+        """
+        Publish a backtest execution message.
+        
+        Args:
+            backtest_id: ID of the backtest to execute
+            user_id: ID of the user who created the backtest
+            strategy_id: ID of the strategy
+            strategy_name: Name of the strategy
+            strategy_code: Strategy code to execute
+            parameters: Backtest parameters
+            correlation_id: Optional correlation ID for tracking
+            
+        Returns:
+            Message ID
+        """
+        await self._ensure_connection()
+        
+        message_id = uuid4()
+        message = BacktestExecutionMessage(
+            message_id=message_id,
+            correlation_id=correlation_id,
+            backtest_id=backtest_id,
+            user_id=user_id,
+            strategy_id=strategy_id,
+            strategy_name=strategy_name,
+            strategy_code=strategy_code,
+            parameters=parameters
+        )
+        
+        try:
+            exchange = await self._connection.get_exchange()
+            
+            # Publish to backtest queue
+            await exchange.publish(
+                aio_pika.Message(
+                    body=message.model_dump_json().encode(),
+                    content_type="application/json",
+                    delivery_mode=aio_pika.DeliveryMode.PERSISTENT,
+                    message_id=str(message_id),
+                    correlation_id=str(correlation_id) if correlation_id else None,
+                ),
+                routing_key="backtest.execute"
+            )
+            
+            logger.info(
+                "Published backtest execution message",
+                message_id=str(message_id),
+                backtest_id=backtest_id,
+                strategy_id=strategy_id
+            )
+            
+            return message_id
+            
+        except Exception as e:
+            logger.error(
+                "Failed to publish backtest execution message",
+                error=str(e),
+                backtest_id=backtest_id
             )
             raise
             
@@ -241,5 +383,76 @@ class MessagePublisher:
                 "Failed to publish retry message",
                 error=str(e),
                 document_id=str(original_message.document_id)
+            )
+            raise
+            
+    async def publish_backtest_execution(
+        self,
+        backtest_id: int,
+        user_id: UUID,
+        strategy_id: int,
+        strategy_name: str,
+        strategy_code: str,
+        parameters: Dict[str, Any],
+        correlation_id: Optional[UUID] = None
+    ) -> UUID:
+        """
+        Publish a backtest execution message.
+        
+        Args:
+            backtest_id: ID of the backtest to execute
+            user_id: ID of the user who created the backtest
+            strategy_id: ID of the strategy
+            strategy_name: Name of the strategy
+            strategy_code: Strategy code to execute
+            parameters: Backtest parameters
+            correlation_id: Optional correlation ID for tracking
+            
+        Returns:
+            Message ID
+        """
+        await self._ensure_connection()
+        
+        message_id = uuid4()
+        message = BacktestExecutionMessage(
+            message_id=message_id,
+            correlation_id=correlation_id,
+            backtest_id=backtest_id,
+            user_id=user_id,
+            strategy_id=strategy_id,
+            strategy_name=strategy_name,
+            strategy_code=strategy_code,
+            parameters=parameters
+        )
+        
+        try:
+            exchange = await self._connection.get_exchange()
+            
+            # Publish to backtest queue
+            await exchange.publish(
+                aio_pika.Message(
+                    body=message.model_dump_json().encode(),
+                    content_type="application/json",
+                    delivery_mode=aio_pika.DeliveryMode.PERSISTENT,
+                    message_id=str(message_id),
+                    correlation_id=str(correlation_id) if correlation_id else None,
+                ),
+                routing_key="backtest.execute"
+            )
+            
+            logger.info(
+                "Published backtest execution message",
+                message_id=str(message_id),
+                backtest_id=backtest_id,
+                strategy_id=strategy_id
+            )
+            
+            return message_id
+            
+        except Exception as e:
+            logger.error(
+                "Failed to publish backtest execution message",
+                error=str(e),
+                backtest_id=backtest_id
             )
             raise

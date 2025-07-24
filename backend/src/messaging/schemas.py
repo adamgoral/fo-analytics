@@ -79,3 +79,32 @@ class ProcessingResultMessage(BaseMessage):
                 "processing_time_ms": 5432
             }
         }
+
+
+class BacktestExecutionMessage(BaseMessage):
+    """Message schema for backtest execution tasks."""
+    
+    backtest_id: int = Field(description="Backtest ID to execute")
+    user_id: UUID = Field(description="User who created the backtest")
+    strategy_id: int = Field(description="Strategy ID to backtest")
+    strategy_name: str = Field(description="Strategy name")
+    strategy_code: str = Field(description="Strategy code to execute")
+    parameters: Dict[str, Any] = Field(description="Backtest parameters")
+    
+    class Config:
+        json_schema_extra = {
+            "example": {
+                "message_id": "123e4567-e89b-12d3-a456-426614174002",
+                "backtest_id": 1,
+                "user_id": "789e0123-e89b-12d3-a456-426614174000",
+                "strategy_id": 1,
+                "strategy_name": "Momentum Strategy",
+                "strategy_code": "def backtest(): ...",
+                "parameters": {
+                    "start_date": "2023-01-01",
+                    "end_date": "2023-12-31",
+                    "initial_capital": 100000,
+                    "max_positions": 10
+                }
+            }
+        }

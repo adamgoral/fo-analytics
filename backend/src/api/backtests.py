@@ -5,6 +5,7 @@ from datetime import datetime
 
 from fastapi import APIRouter, Depends, HTTPException, status, Query
 from sqlalchemy.ext.asyncio import AsyncSession
+import structlog
 
 from core.auth import get_current_active_user
 from core.database import get_db
@@ -22,8 +23,10 @@ from schemas.backtest import (
     BacktestResultsUpload
 )
 from services.backtesting import BacktestingService
+from messaging.publisher import MessagePublisher
 
 router = APIRouter(prefix="/backtests", tags=["backtests"])
+logger = structlog.get_logger(__name__)
 
 
 @router.post("/", response_model=Dict[str, Any], status_code=status.HTTP_201_CREATED)
@@ -253,6 +256,7 @@ async def start_backtest(
     backtest_id: int,
     current_user: User = Depends(get_current_active_user),
     backtest_repo: BacktestRepository = Depends(get_backtest_repository),
+    strategy_repo: StrategyRepository = Depends(get_strategy_repository),
 ):
     """
     Start a queued backtest.
@@ -287,7 +291,51 @@ async def start_backtest(
         started_at=datetime.utcnow()
     )
     
-    # TODO: Trigger actual backtest execution (e.g., send to queue)
+    # Get the strategy details
+    strategy = await strategy_repo.get(backtest.strategy_id)
+    if not strategy:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Strategy not found"
+        )
+    
+    # Publish backtest execution message to RabbitMQ
+    try:
+        publisher = MessagePublisher()
+        message_id = await publisher.publish_backtest_execution(
+            backtest_id=backtest_id,
+            user_id=current_user.id,
+            strategy_id=strategy.id,
+            strategy_name=strategy.name,
+            strategy_code=strategy.code,
+            parameters=backtest.parameters
+        )
+        
+        logger.info(
+            "Published backtest execution message",
+            backtest_id=backtest_id,
+            message_id=str(message_id),
+            strategy_id=strategy.id
+        )
+    except Exception as e:
+        # Log error but don't fail - the backtest is already marked as running
+        logger.error(
+            "Failed to publish backtest execution message",
+            backtest_id=backtest_id,
+            strategy_id=strategy.id,
+            error=str(e),
+            exc_info=True
+        )
+        # Optionally, revert status back to QUEUED
+        await backtest_repo.update(
+            backtest_id,
+            status=BacktestStatus.QUEUED,
+            started_at=None
+        )
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Failed to start backtest execution"
+        )
     
     return updated_backtest
 

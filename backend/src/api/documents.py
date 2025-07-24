@@ -9,6 +9,7 @@ from io import BytesIO
 from fastapi import APIRouter, Depends, HTTPException, status, Query, UploadFile, File
 from fastapi.responses import StreamingResponse
 from sqlalchemy.ext.asyncio import AsyncSession
+import structlog
 
 from core.auth import get_current_active_user
 from core.database import get_db
@@ -30,6 +31,7 @@ from messaging.publisher import MessagePublisher
 from api.websockets import notifier
 
 router = APIRouter(prefix="/documents", tags=["documents"])
+logger = structlog.get_logger(__name__)
 
 # Use settings for allowed extensions and max file size
 ALLOWED_EXTENSIONS = {ext: None for ext in settings.allowed_file_extensions}
@@ -139,8 +141,14 @@ async def upload_document(
         )
     except Exception as e:
         # Log error but don't fail the upload
-        # TODO: Add proper logging
-        print(f"Failed to publish processing message: {str(e)}")
+        logger.error(
+            "Failed to publish document processing message",
+            document_id=str(document.id),
+            user_id=str(current_user.id),
+            filename=file.filename,
+            error=str(e),
+            exc_info=True
+        )
     
     # Send WebSocket notification for upload completed
     await notifier.document_upload_completed(
