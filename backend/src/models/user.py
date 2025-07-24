@@ -34,3 +34,4 @@ class User(Base, TimestampMixin):
     documents: Mapped[List["Document"]] = relationship(back_populates="uploaded_by", cascade="all, delete-orphan")
     strategies: Mapped[List["Strategy"]] = relationship(back_populates="created_by", cascade="all, delete-orphan")
     backtests: Mapped[List["Backtest"]] = relationship(back_populates="created_by", cascade="all, delete-orphan")
+    chat_sessions: Mapped[List["ChatSession"]] = relationship(back_populates="user", cascade="all, delete-orphan")

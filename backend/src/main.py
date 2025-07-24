@@ -13,6 +13,7 @@ from api.backtests import router as backtests_router
 from api.documents import router as documents_router
 from api.routes.ws import router as ws_router
 from api.portfolio import router as portfolio_router
+from api.chat import router as chat_router
 from utils.logging import configure_logging, logger
 from middleware.logging import RequestLoggingMiddleware, PerformanceLoggingMiddleware
 from messaging.connection import get_rabbitmq_connection
@@ -102,6 +103,7 @@ def create_app() -> FastAPI:
     app.include_router(backtests_router, prefix=settings.api_prefix)
     app.include_router(documents_router, prefix=settings.api_prefix)
     app.include_router(portfolio_router, prefix=settings.api_prefix)
+    app.include_router(chat_router, prefix=settings.api_prefix)
     app.include_router(ws_router, prefix=settings.api_prefix)
     
     return app

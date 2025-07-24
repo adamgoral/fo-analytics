@@ -32,6 +32,15 @@ from .document import (
     DocumentListResponse,
     DocumentProcessRequest
 )
+from .chat import (
+    ChatSessionCreate,
+    ChatSessionUpdate,
+    ChatSessionResponse,
+    ChatSessionWithMessages,
+    ChatMessageCreate,
+    ChatMessageResponse,
+    ChatStreamChunk
+)
 
 __all__ = [
     # Auth schemas
@@ -62,4 +71,12 @@ __all__ = [
     "DocumentResponse",
     "DocumentListResponse",
     "DocumentProcessRequest",
+    # Chat schemas
+    "ChatSessionCreate",
+    "ChatSessionUpdate",
+    "ChatSessionResponse",
+    "ChatSessionWithMessages",
+    "ChatMessageCreate",
+    "ChatMessageResponse",
+    "ChatStreamChunk",
 ]
