@@ -195,6 +195,67 @@ class DataLoader:
         
         return data
     
+    async def load_returns_data(
+        self,
+        symbols: List[str],
+        start_date: datetime,
+        end_date: datetime,
+        interval: str = "1d"
+    ) -> pd.DataFrame:
+        """Load returns data for multiple symbols.
+        
+        Args:
+            symbols: List of symbols to load
+            start_date: Start date for data
+            end_date: End date for data
+            interval: Data interval
+            
+        Returns:
+            DataFrame with returns for each symbol as columns
+        """
+        returns_dict = {}
+        
+        # Load data for each symbol
+        for symbol in symbols:
+            try:
+                # Convert datetime to date if needed
+                start_dt = start_date.date() if isinstance(start_date, datetime) else start_date
+                end_dt = end_date.date() if isinstance(end_date, datetime) else end_date
+                
+                data = await self.load_data(
+                    asset_class=AssetClass.EQUITY,  # Default to equity
+                    start_date=start_dt,
+                    end_date=end_dt,
+                    symbols=[symbol],
+                    interval=interval
+                )
+                if not data.empty:
+                    # Calculate returns from close prices
+                    returns = data['Close'].pct_change().dropna()
+                    returns_dict[symbol] = returns
+            except Exception as e:
+                logger.error(f"Failed to load data for {symbol}: {str(e)}")
+                continue
+        
+        # Create DataFrame from returns
+        if returns_dict:
+            returns_df = pd.DataFrame(returns_dict)
+            # Drop any rows with NaN values
+            returns_df = returns_df.dropna()
+            
+            logger.info(
+                "Returns data loaded",
+                symbols=symbols,
+                start_date=start_date,
+                end_date=end_date,
+                shape=returns_df.shape
+            )
+            
+            return returns_df
+        else:
+            logger.warning("No returns data loaded for any symbols")
+            return pd.DataFrame()
+    
     async def get_latest_price(self, symbol: str) -> Optional[float]:
         """Get the latest price for a symbol."""
         try:

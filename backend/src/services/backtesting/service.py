@@ -19,6 +19,9 @@ from messaging.publisher import MessagePublisher
 from messaging.backtest_schemas import BacktestMessage
 from .strategies import StrategyFactory
 from .data_loader import DataLoader
+from .risk_metrics import RiskMetricsCalculator
+from .portfolio_optimizer import PortfolioOptimizer
+from .multi_strategy import MultiStrategyBacktester
 
 logger = structlog.get_logger(__name__)
 
@@ -205,11 +208,15 @@ class BacktestingService:
         """Format backtesting.py results for database storage."""
         # Extract equity curve data
         equity_curve = None
+        returns_series = None
         if hasattr(stats, '_equity_curve'):
             equity_curve = {
                 "dates": stats._equity_curve.index.astype(str).tolist(),
                 "values": stats._equity_curve['Equity'].tolist()
             }
+            # Calculate returns from equity curve
+            equity_values = stats._equity_curve['Equity']
+            returns_series = equity_values.pct_change().dropna()
         
         # Extract trade data
         trades = None
@@ -234,6 +241,16 @@ class BacktestingService:
             "sqn": float(stats.get('SQN', 0) or 0)
         }
         
+        # Calculate advanced risk metrics if we have returns
+        risk_metrics = {}
+        if returns_series is not None and len(returns_series) > 0:
+            try:
+                risk_calculator = RiskMetricsCalculator(returns_series)
+                risk_metrics = risk_calculator.calculate_all_metrics()
+                logger.info("Calculated advanced risk metrics", metrics_count=len(risk_metrics))
+            except Exception as e:
+                logger.error("Failed to calculate risk metrics", error=str(e))
+        
         return {
             "total_return": float(stats['Return [%]']),
             "annualized_return": float(stats.get('Return (Ann.) [%]', 0) or 0),
@@ -244,7 +261,8 @@ class BacktestingService:
             "win_rate": float(stats.get('Win Rate [%]', 0) or 0),
             "equity_curve": equity_curve,
             "trades": trades,
-            "statistics": statistics
+            "statistics": statistics,
+            "risk_metrics": risk_metrics
         }
     
     async def get_backtest_results(self, backtest_id: int) -> Optional[Dict[str, Any]]:

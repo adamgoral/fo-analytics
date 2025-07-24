@@ -18,6 +18,40 @@ The project has successfully completed Sprint 2 with all planned features delive
     - test_document_parser_service.py - Tests document parsing service
   - All quick fixes completed within first day of Sprint 3
 
+- ✅ **Advanced Backtesting Features Implemented**: Portfolio optimization and risk metrics
+  - **Portfolio Optimization Algorithms** (portfolio_optimizer.py):
+    - Markowitz mean-variance optimization with target returns
+    - Maximum Sharpe ratio portfolio selection
+    - Minimum volatility portfolio optimization
+    - Risk parity portfolio (equal risk contribution)
+    - Black-Litterman model combining market equilibrium with investor views
+    - Efficient frontier generation with multiple portfolios
+    - Comprehensive portfolio metrics calculation
+  - **Multi-Strategy Portfolio Backtesting** (multi_strategy.py):
+    - Support for running multiple strategies simultaneously
+    - Portfolio rebalancing (daily, weekly, monthly, quarterly, yearly)
+    - Strategy signal combination with weighted averaging
+    - Integration with portfolio optimization methods
+    - Async execution with thread pool for performance
+  - **Advanced Risk Metrics** (risk_metrics.py):
+    - Value at Risk (VaR) - Historical, Parametric, Cornish-Fisher, Monte Carlo methods
+    - Conditional Value at Risk (CVaR/Expected Shortfall)
+    - Comprehensive drawdown analysis with recovery times
+    - Advanced ratios: Omega, Gain/Loss, Profit Factor, Tail Ratio
+    - Relative metrics: Information Ratio, Beta, Alpha, Correlation
+    - Risk-adjusted metrics: Sharpe, Sortino, Calmar, Sterling, Burke ratios
+  - **API Integration** (api/portfolio.py):
+    - POST /portfolio/optimize - Optimize portfolio allocation
+    - POST /portfolio/efficient-frontier - Calculate efficient frontier
+    - POST /portfolio/multi-strategy-backtest - Run multi-strategy backtest
+    - POST /portfolio/risk-metrics - Calculate comprehensive risk metrics
+    - GET /portfolio/optimization-methods - List available methods
+  - **Comprehensive Test Coverage**:
+    - test_portfolio_optimizer.py - Unit tests for all optimization methods
+    - test_risk_metrics.py - Tests for all risk metric calculations
+    - test_multi_strategy.py - Tests for multi-strategy backtesting
+  - Added scipy>=1.14.0 dependency for optimization algorithms
+
 ### Recent Updates (Post-Sprint 1)
 - ✅ **Python Import Structure Fixed**: Cleaned up package configuration
   - Removed `src.` prefix from all imports throughout the backend

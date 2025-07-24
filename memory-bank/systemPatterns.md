@@ -220,13 +220,115 @@ The platform follows a microservices architecture pattern with clear service bou
   strategies = await llm_service.extract_strategies(document_text)
   ```
 
-### Backtesting Service
+### Backtesting Service (✅ Advanced Features Implemented July 24, 2025)
 - **Primary Responsibility**: Strategy execution and performance analysis
+- **Implemented Components**:
+  - ✅ Basic backtesting with 5 strategy types (SMA, RSI, Bollinger, Momentum, Custom)
+  - ✅ Data loader with yfinance integration for all asset classes
+  - ✅ Async execution with thread pool
+  - ✅ RabbitMQ integration for job processing
+  - ✅ **Portfolio Optimization Module**:
+    - Markowitz mean-variance optimization
+    - Black-Litterman model implementation
+    - Risk parity portfolios
+    - Maximum Sharpe/minimum volatility portfolios
+    - Efficient frontier generation
+  - ✅ **Multi-Strategy Backtesting**:
+    - Run multiple strategies simultaneously
+    - Portfolio rebalancing (daily/weekly/monthly/quarterly/yearly)
+    - Strategy signal combination
+    - Integration with all optimization methods
+  - ✅ **Advanced Risk Metrics**:
+    - Value at Risk (Historical, Parametric, Cornish-Fisher, Monte Carlo)
+    - Conditional VaR (CVaR/Expected Shortfall)
+    - Comprehensive drawdown analysis
+    - Advanced ratios (Omega, Information, Calmar, Sterling, Burke)
+    - Relative metrics (Beta, Alpha, Correlation)
 - **Key Patterns**:
-  - Strategy pattern for different frameworks
-  - Factory pattern for backtest creation
-  - Observer pattern for progress updates
-  - Decorator pattern for metric calculations
+  - **Strategy Pattern**: Different trading strategies implement common interface
+  - **Factory Pattern**: Strategy and optimizer creation
+  - **Observer Pattern**: Progress updates via WebSocket
+  - **Decorator Pattern**: Risk metric calculations wrap basic results
+  - **Composite Pattern**: Multi-strategy portfolios combine individual strategies
+- **Architecture**:
+  ```python
+  # Portfolio optimization
+  optimizer = PortfolioOptimizer(returns_data, risk_free_rate=0.02)
+  result = optimizer.mean_variance_optimization(target_return=0.10)
+  result = optimizer.black_litterman(market_caps, views, confidence)
+  
+  # Multi-strategy backtesting
+  backtester = MultiStrategyBacktester()
+  results = await backtester.run_multi_strategy_backtest(
+      strategies=[strategy1_config, strategy2_config],
+      optimization_method="risk_parity",
+      rebalance_frequency="monthly"
+  )
+  
+  # Risk metrics calculation
+  calculator = RiskMetricsCalculator(returns, benchmark_returns)
+  metrics = calculator.calculate_all_metrics(confidence_levels=[0.95, 0.99])
+  ```
+
+## Portfolio Optimization Patterns (✅ Implemented July 24, 2025)
+
+### Optimization Algorithms
+- **Markowitz Mean-Variance**: Classic portfolio theory implementation
+  - Minimize risk for target return
+  - Maximize Sharpe ratio
+  - Efficient frontier generation
+- **Black-Litterman Model**: Combines market equilibrium with investor views
+  - Market capitalization weights as prior
+  - Investor views with confidence levels
+  - Posterior return estimation
+- **Risk Parity**: Equal risk contribution from each asset
+  - Iterative optimization for risk balance
+  - Suitable for diversified portfolios
+- **Numerical Optimization**: Scipy integration
+  - SLSQP solver for constrained optimization
+  - Custom constraints support
+  - Bounds handling for long-only portfolios
+
+### Multi-Strategy Architecture
+```python
+# Strategy composition pattern
+class MultiStrategyPortfolio(Strategy):
+    def add_strategy(strategy: BaseStrategy, weight: float)
+    def set_optimization_method(method: str, params: dict)
+    def _rebalance_portfolio()  # Dynamic weight adjustment
+    def _combine_signals(signals: List[float]) -> float
+    
+# Rebalancing logic
+if should_rebalance(current_date):
+    returns = get_strategy_returns(lookback_days)
+    optimizer = PortfolioOptimizer(returns)
+    weights = optimizer.optimize()
+    apply_weights(weights)
+```
+
+### Risk Metrics Framework
+- **Value at Risk (VaR)**:
+  - Historical: Empirical percentile
+  - Parametric: Normal distribution assumption
+  - Cornish-Fisher: Adjusts for skewness/kurtosis
+  - Monte Carlo: Simulation-based
+- **Performance Metrics**:
+  - Sharpe, Sortino, Calmar ratios
+  - Information ratio for benchmark comparison
+  - Omega ratio for gain/loss asymmetry
+- **Drawdown Analysis**:
+  - Maximum drawdown tracking
+  - Recovery time analysis
+  - Drawdown duration statistics
+
+### API Integration
+- **Portfolio Endpoints**:
+  - POST /portfolio/optimize - Run optimization
+  - POST /portfolio/efficient-frontier - Generate frontier
+  - POST /portfolio/multi-strategy-backtest - Multi-strategy test
+  - POST /portfolio/risk-metrics - Calculate risk metrics
+- **Async Processing**: Thread pool for CPU-intensive calculations
+- **Result Caching**: Redis for expensive computations (planned)
 
 ## Data Flow Patterns
 
