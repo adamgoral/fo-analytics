@@ -8,6 +8,7 @@ import LoginPage from './features/auth/LoginPage';
 import DashboardPage from './features/dashboard/DashboardPage';
 import DocumentsPage from './features/documents/DocumentsPage';
 import StrategiesPage from './features/strategies/StrategiesPage';
+import { AIChatPage } from './features/ai-chat';
 import { websocketService } from './services/websocket';
 import './App.css';
 
@@ -54,6 +55,7 @@ function App() {
           <Route index element={<DashboardPage />} />
           <Route path="documents" element={<DocumentsPage />} />
           <Route path="strategies" element={<StrategiesPage />} />
+          <Route path="ai-chat" element={<AIChatPage />} />
           <Route 
             path="backtests" 
             element={

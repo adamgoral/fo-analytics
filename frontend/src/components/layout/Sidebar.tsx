@@ -21,6 +21,7 @@ import {
   BarChart as AnalyticsIcon,
   Notifications as NotificationsIcon,
   Help as HelpIcon,
+  SmartToy as AIChatIcon,
 } from '@mui/icons-material';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../hooks';
@@ -71,6 +72,12 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose, width }) => {
       label: 'Backtests',
       icon: <BacktestIcon />,
       path: '/backtests',
+    },
+    {
+      id: 'ai-chat',
+      label: 'AI Chat',
+      icon: <AIChatIcon />,
+      path: '/ai-chat',
     },
     {
       id: 'analytics',
