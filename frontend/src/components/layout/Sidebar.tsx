@@ -22,6 +22,7 @@ import {
   Notifications as NotificationsIcon,
   Help as HelpIcon,
   SmartToy as AIChatIcon,
+  PieChart as PortfolioIcon,
 } from '@mui/icons-material';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../hooks';
@@ -66,6 +67,12 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose, width }) => {
       icon: <StrategiesIcon />,
       path: '/strategies',
       badge: 12,
+    },
+    {
+      id: 'portfolio',
+      label: 'Portfolio',
+      icon: <PortfolioIcon />,
+      path: '/portfolio',
     },
     {
       id: 'backtests',

@@ -2,11 +2,13 @@ import { configureStore } from '@reduxjs/toolkit';
 import { useDispatch, useSelector, type TypedUseSelectorHook } from 'react-redux';
 import authReducer from './slices/authSlice';
 import chatReducer from './slices/chatSlice';
+import portfolioReducer from './portfolioSlice';
 
 export const store = configureStore({
   reducer: {
     auth: authReducer,
     chat: chatReducer,
+    portfolio: portfolioReducer,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({
