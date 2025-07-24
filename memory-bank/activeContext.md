@@ -286,7 +286,13 @@ The project has successfully completed Sprint 2 with all planned features delive
    - ✅ Integration with document and strategy context
 
 #### 4. **Advanced UI Components**
-   - Strategy code editor with syntax highlighting (Monaco Editor)
+   - ✅ Strategy code editor with syntax highlighting (Monaco Editor) - COMPLETED (July 24, 2025)
+     - Implemented StrategyCodeEditor component with React Monaco Editor
+     - Added syntax highlighting for Python, JavaScript, and TypeScript
+     - Updated Strategy model with code and code_language fields
+     - Created API endpoint PUT /strategies/{id}/code for updating strategy code
+     - Integrated into StrategiesPage with "View Code" functionality
+     - Note: Database migration for new fields needs to be run
    - Custom indicator builder with visual programming
    - Interactive charting with TradingView or similar
    - Portfolio analytics dashboard with drill-down

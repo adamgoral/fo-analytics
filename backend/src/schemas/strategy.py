@@ -19,6 +19,8 @@ class StrategyBase(BaseModel):
     entry_rules: Dict = Field(default_factory=dict)
     exit_rules: Dict = Field(default_factory=dict)
     risk_parameters: Dict = Field(default_factory=dict)
+    code: Optional[str] = None
+    code_language: str = Field(default="python")
 
 
 class StrategyCreate(StrategyBase):
@@ -38,6 +40,8 @@ class StrategyUpdate(BaseModel):
     entry_rules: Optional[Dict] = None
     exit_rules: Optional[Dict] = None
     risk_parameters: Optional[Dict] = None
+    code: Optional[str] = None
+    code_language: Optional[str] = None
 
 
 class StrategyResponse(BaseModel):
@@ -54,6 +58,8 @@ class StrategyResponse(BaseModel):
     entry_rules: Dict
     exit_rules: Dict
     risk_parameters: Dict
+    code: Optional[str]
+    code_language: str
     
     # Performance metrics
     expected_return: Optional[float]

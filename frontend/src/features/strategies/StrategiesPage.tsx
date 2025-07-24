@@ -37,6 +37,7 @@ import {
   Code as CodeIcon,
   Assessment as BacktestIcon,
 } from '@mui/icons-material';
+import { StrategyCodeEditor } from '../../components/StrategyCodeEditor';
 
 interface Strategy {
   id: string;
@@ -52,6 +53,8 @@ interface Strategy {
   documentSource: string;
   createdAt: string;
   lastBacktest: string | null;
+  code?: string;
+  codeLanguage?: string;
 }
 
 const StrategiesPage: React.FC = () => {
@@ -59,6 +62,8 @@ const StrategiesPage: React.FC = () => {
   const [menuAnchor, setMenuAnchor] = useState<null | HTMLElement>(null);
   const [selectedStrategyId, setSelectedStrategyId] = useState<string | null>(null);
   const [backtestDialogOpen, setBacktestDialogOpen] = useState(false);
+  const [codeDialogOpen, setCodeDialogOpen] = useState(false);
+  const [editingCode, setEditingCode] = useState<{ id: string; code: string; language: string } | null>(null);
   const [backtestParams, setBacktestParams] = useState({
     startDate: '2023-01-01',
     endDate: '2024-01-01',
@@ -82,6 +87,38 @@ const StrategiesPage: React.FC = () => {
       documentSource: 'Q4 Trading Strategy.pdf',
       createdAt: '2024-01-15T10:30:00Z',
       lastBacktest: '2024-01-20T14:20:00Z',
+      code: `import pandas as pd
+import numpy as np
+from typing import Dict, List
+
+class MomentumAlphaStrategy:
+    def __init__(self, lookback_period: int = 20, momentum_threshold: float = 0.05):
+        self.lookback_period = lookback_period
+        self.momentum_threshold = momentum_threshold
+        
+    def calculate_signals(self, data: pd.DataFrame) -> pd.Series:
+        """Calculate momentum signals based on price movements."""
+        returns = data['close'].pct_change(self.lookback_period)
+        signals = pd.Series(0, index=data.index)
+        
+        # Long signals when momentum exceeds threshold
+        signals[returns > self.momentum_threshold] = 1
+        # Short signals when momentum is negative
+        signals[returns < -self.momentum_threshold] = -1
+        
+        return signals
+        
+    def apply_risk_management(self, signals: pd.Series, data: pd.DataFrame) -> pd.Series:
+        """Apply risk overlay to reduce exposure during high volatility."""
+        volatility = data['close'].pct_change().rolling(20).std()
+        risk_adjusted_signals = signals.copy()
+        
+        # Reduce position size in high volatility
+        high_vol_mask = volatility > volatility.quantile(0.8)
+        risk_adjusted_signals[high_vol_mask] *= 0.5
+        
+        return risk_adjusted_signals`,
+      codeLanguage: 'python',
     },
     {
       id: '2',
@@ -97,6 +134,34 @@ const StrategiesPage: React.FC = () => {
       documentSource: 'Market Analysis Q3.pdf',
       createdAt: '2024-01-14T14:20:00Z',
       lastBacktest: '2024-01-18T09:15:00Z',
+      code: `from zipline.api import order_target_percent, record, symbol
+import talib
+
+def initialize(context):
+    context.stock = symbol('AAPL')
+    context.lookback = 20
+    context.z_score_threshold = 2.0
+    
+def handle_data(context, data):
+    # Get historical prices
+    prices = data.history(context.stock, 'price', context.lookback + 1, '1d')
+    
+    # Calculate z-score
+    mean = prices[:-1].mean()
+    std = prices[:-1].std()
+    current_price = prices[-1]
+    z_score = (current_price - mean) / std
+    
+    # Trading logic
+    if z_score < -context.z_score_threshold:
+        # Buy when oversold
+        order_target_percent(context.stock, 1.0)
+    elif z_score > context.z_score_threshold:
+        # Sell when overbought
+        order_target_percent(context.stock, 0.0)
+        
+    record(z_score=z_score)`,
+      codeLanguage: 'python',
     },
     {
       id: '3',
@@ -178,6 +243,16 @@ const StrategiesPage: React.FC = () => {
     console.log(`${action} strategy:`, selectedStrategyId);
     if (action === 'backtest') {
       setBacktestDialogOpen(true);
+    } else if (action === 'code') {
+      const strategy = strategies.find(s => s.id === selectedStrategyId);
+      if (strategy) {
+        setEditingCode({
+          id: strategy.id,
+          code: strategy.code || '# No code available for this strategy',
+          language: strategy.codeLanguage || 'python',
+        });
+        setCodeDialogOpen(true);
+      }
     }
     handleMenuClose();
   };
@@ -451,6 +526,44 @@ const StrategiesPage: React.FC = () => {
           </Button>
           <Button onClick={handleRunBacktest} variant="contained">
             Run Backtest
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* Code Editor Dialog */}
+      <Dialog
+        open={codeDialogOpen}
+        onClose={() => setCodeDialogOpen(false)}
+        maxWidth="lg"
+        fullWidth
+      >
+        <DialogTitle>
+          {editingCode && strategies.find(s => s.id === editingCode.id)?.name} - Strategy Code
+        </DialogTitle>
+        <DialogContent>
+          {editingCode && (
+            <Box sx={{ height: '600px', mt: 2 }}>
+              <StrategyCodeEditor
+                code={editingCode.code}
+                language={editingCode.language}
+                height="550px"
+                onChange={(value) => {
+                  if (value !== undefined && editingCode) {
+                    setEditingCode({ ...editingCode, code: value });
+                  }
+                }}
+                onSave={(code) => {
+                  console.log('Saving strategy code:', editingCode.id, code);
+                  // TODO: Implement API call to save code
+                  setCodeDialogOpen(false);
+                }}
+              />
+            </Box>
+          )}
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setCodeDialogOpen(false)}>
+            Close
           </Button>
         </DialogActions>
       </Dialog>

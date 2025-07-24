@@ -46,6 +46,10 @@ class Strategy(Base, TimestampMixin):
     exit_rules: Mapped[dict] = mapped_column(JSON, nullable=False, default=dict)
     risk_parameters: Mapped[dict] = mapped_column(JSON, nullable=False, default=dict)
     
+    # Strategy implementation code
+    code: Mapped[str | None] = mapped_column(Text, nullable=True)
+    code_language: Mapped[str] = mapped_column(String(50), nullable=False, default="python")
+    
     # Performance metrics (populated after backtesting)
     expected_return: Mapped[float | None] = mapped_column(Float, nullable=True)
     expected_volatility: Mapped[float | None] = mapped_column(Float, nullable=True)

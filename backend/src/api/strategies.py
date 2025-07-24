@@ -260,3 +260,44 @@ async def deactivate_strategy(
     )
     
     return updated_strategy
+
+
+@router.put("/{strategy_id}/code", response_model=StrategyResponse)
+async def update_strategy_code(
+    strategy_id: int,
+    code_update: dict,
+    current_user: User = Depends(get_current_active_user),
+    strategy_repo: StrategyRepository = Depends(get_strategy_repository),
+):
+    """
+    Update the code implementation of a strategy.
+    
+    Requires authentication and ownership.
+    
+    Request body:
+    - code: The strategy implementation code
+    - code_language: Programming language (default: python)
+    """
+    # Check ownership
+    strategy = await strategy_repo.get(strategy_id)
+    
+    if not strategy:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Strategy not found"
+        )
+    
+    if strategy.created_by_id != current_user.id:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Not authorized to update this strategy"
+        )
+    
+    # Update code
+    updated_strategy = await strategy_repo.update(
+        strategy_id,
+        code=code_update.get("code"),
+        code_language=code_update.get("code_language", "python")
+    )
+    
+    return updated_strategy
