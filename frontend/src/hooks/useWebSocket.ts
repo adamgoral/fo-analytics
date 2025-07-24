@@ -3,7 +3,8 @@
  */
 
 import { useEffect, useRef } from 'react';
-import { websocketService, WebSocketMessage, MessageHandler } from '../services/websocket';
+import { websocketService } from '../services/websocket';
+import type { MessageHandler } from '../services/websocket';
 import { useAuth } from './useAuth';
 
 export interface UseWebSocketOptions {

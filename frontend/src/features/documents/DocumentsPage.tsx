@@ -5,7 +5,6 @@ import {
   Button,
   Card,
   CardContent,
-  Grid,
   Chip,
   IconButton,
   Menu,
@@ -25,6 +24,8 @@ import {
   Alert,
   Snackbar,
   CircularProgress,
+  Drawer,
+  Grid,
 } from '@mui/material';
 import {
   Add as AddIcon,
@@ -40,24 +41,41 @@ import {
 } from '@mui/icons-material';
 import { useAuth } from '../../hooks';
 import { useWebSocket } from '../../hooks/useWebSocket';
-import { 
+import type { 
   DocumentProcessingProgressMessage,
   DocumentProcessingCompletedMessage,
   DocumentProcessingFailedMessage,
   StrategyExtractedMessage,
   WebSocketMessage
 } from '../../services/websocket';
+import { documentsApi } from '../../services/documents';
+import { backtestsApi } from '../../services/backtests';
+import DocumentViewer from './DocumentViewer';
+import BacktestResults from '../backtests/BacktestResults';
 
 interface Document {
   id: string;
   name: string;
   size: number;
   uploadedAt: string;
-  status: 'processing' | 'completed' | 'failed';
+  status: 'pending' | 'processing' | 'completed' | 'failed';
   strategiesCount: number;
   uploadedBy: string;
   processingProgress?: number;
   processingMessage?: string;
+  fileType?: string;
+  userId?: string;
+  // Backend field mappings
+  file_name?: string;
+  file_size?: number;
+  uploaded_at?: string;
+  strategies_count?: number;
+  user_id?: string;
+  file_type?: string;
+  user?: {
+    full_name?: string;
+    email?: string;
+  };
 }
 
 const DocumentsPage: React.FC = () => {
@@ -69,37 +87,51 @@ const DocumentsPage: React.FC = () => {
   const [menuAnchor, setMenuAnchor] = useState<null | HTMLElement>(null);
   const [selectedDocumentId, setSelectedDocumentId] = useState<string | null>(null);
   const [notification, setNotification] = useState<{ message: string; severity: 'success' | 'error' | 'info' } | null>(null);
+  const [documents, setDocuments] = useState<Document[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [selectedDocument, setSelectedDocument] = useState<Document | null>(null);
+  const [documentViewerOpen, setDocumentViewerOpen] = useState(false);
+  const [backtestResultsOpen, setBacktestResultsOpen] = useState(false);
+  const [selectedBacktestId, setSelectedBacktestId] = useState<string | null>(null);
 
-  // Mock data - in real app this would come from API
-  const [documents, setDocuments] = useState<Document[]>([
-    {
-      id: '1',
-      name: 'Q4 Trading Strategy.pdf',
-      size: 2400000,
-      uploadedAt: '2024-01-15T10:30:00Z',
-      status: 'completed',
-      strategiesCount: 5,
-      uploadedBy: 'John Doe',
-    },
-    {
-      id: '2',
-      name: 'Market Analysis Q3.pdf',
-      size: 1800000,
-      uploadedAt: '2024-01-14T14:20:00Z',
-      status: 'processing',
-      strategiesCount: 0,
-      uploadedBy: 'Jane Smith',
-    },
-    {
-      id: '3',
-      name: 'Risk Management Framework.pdf',
-      size: 3200000,
-      uploadedAt: '2024-01-13T09:15:00Z',
-      status: 'failed',
-      strategiesCount: 0,
-      uploadedBy: 'Mike Johnson',
-    },
-  ]);
+  // Helper function to normalize document data from backend
+  const normalizeDocument = (doc: any): Document => {
+    return {
+      id: doc.id,
+      name: doc.file_name || doc.name,
+      size: doc.file_size || doc.size || 0,
+      uploadedAt: doc.uploaded_at || doc.uploadedAt,
+      status: doc.status,
+      strategiesCount: doc.strategies_count || doc.strategiesCount || 0,
+      uploadedBy: doc.user?.full_name || doc.user?.email || doc.uploadedBy || 'Unknown',
+      fileType: doc.file_type || doc.fileType,
+      userId: doc.user_id || doc.userId,
+      processingProgress: doc.processingProgress,
+      processingMessage: doc.processingMessage,
+    };
+  };
+
+  // Load documents on mount
+  useEffect(() => {
+    loadDocuments();
+  }, []);
+
+  const loadDocuments = async () => {
+    setLoading(true);
+    try {
+      const response = await documentsApi.list();
+      const normalizedDocs = response.map(normalizeDocument);
+      setDocuments(normalizedDocs);
+    } catch (error: any) {
+      console.error('Failed to load documents:', error);
+      setNotification({
+        message: 'Failed to load documents',
+        severity: 'error',
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
 
   // WebSocket handlers
   const handleProcessingProgress = useCallback((message: WebSocketMessage) => {
@@ -210,19 +242,34 @@ const DocumentsPage: React.FC = () => {
     setUploading(true);
     setUploadProgress(0);
 
-    // Simulate upload progress
-    const progressInterval = setInterval(() => {
-      setUploadProgress((prev) => {
-        if (prev >= 100) {
-          clearInterval(progressInterval);
-          setUploading(false);
-          setUploadDialogOpen(false);
-          setSelectedFile(null);
-          return 100;
-        }
-        return prev + 10;
+    try {
+      const response = await documentsApi.upload(
+        selectedFile,
+        (progress) => setUploadProgress(progress)
+      );
+
+      // Add the new document to the list
+      const normalizedDoc = normalizeDocument(response);
+      setDocuments((prev) => [normalizedDoc, ...prev]);
+      
+      setNotification({
+        message: 'Document uploaded successfully. Processing will begin shortly.',
+        severity: 'success',
       });
-    }, 300);
+
+      // Close dialog and reset
+      setUploadDialogOpen(false);
+      setSelectedFile(null);
+    } catch (error: any) {
+      console.error('Upload failed:', error);
+      setNotification({
+        message: error.message || 'Failed to upload document',
+        severity: 'error',
+      });
+    } finally {
+      setUploading(false);
+      setUploadProgress(0);
+    }
   };
 
   const handleMenuOpen = (event: React.MouseEvent<HTMLElement>, documentId: string) => {
@@ -235,9 +282,91 @@ const DocumentsPage: React.FC = () => {
     setSelectedDocumentId(null);
   };
 
-  const handleAction = (action: string) => {
-    console.log(`${action} document:`, selectedDocumentId);
+  const handleAction = async (action: string) => {
+    const document = documents.find(d => d.id === selectedDocumentId);
+    if (!document) return;
+
+    switch (action) {
+      case 'view':
+        setSelectedDocument(document);
+        setDocumentViewerOpen(true);
+        break;
+      
+      case 'download':
+        try {
+          if (selectedDocumentId) {
+            await documentsApi.download(selectedDocumentId, document.name);
+          }
+        } catch (error: any) {
+          setNotification({
+            message: 'Failed to download document',
+            severity: 'error',
+          });
+        }
+        break;
+      
+      case 'analyze':
+        try {
+          if (selectedDocumentId) {
+            await documentsApi.process(selectedDocumentId);
+          }
+          setNotification({
+            message: 'Document re-analysis started',
+            severity: 'info',
+          });
+        } catch (error: any) {
+          setNotification({
+            message: 'Failed to start re-analysis',
+            severity: 'error',
+          });
+        }
+        break;
+      
+      case 'delete':
+        if (window.confirm('Are you sure you want to delete this document?')) {
+          try {
+            if (selectedDocumentId) {
+              await documentsApi.delete(selectedDocumentId);
+            }
+            setDocuments(prev => prev.filter(d => d.id !== selectedDocumentId));
+            setNotification({
+              message: 'Document deleted successfully',
+              severity: 'success',
+            });
+          } catch (error: any) {
+            setNotification({
+              message: 'Failed to delete document',
+              severity: 'error',
+            });
+          }
+        }
+        break;
+    }
+
     handleMenuClose();
+  };
+
+  const handleRunBacktest = async (strategyId: string) => {
+    try {
+      const response = await backtestsApi.create({
+        strategy_id: strategyId,
+        // Use default parameters for now
+      });
+      
+      setSelectedBacktestId(response.id);
+      setBacktestResultsOpen(true);
+      setDocumentViewerOpen(false);
+      
+      setNotification({
+        message: 'Backtest started successfully',
+        severity: 'success',
+      });
+    } catch (error: any) {
+      setNotification({
+        message: 'Failed to start backtest',
+        severity: 'error',
+      });
+    }
   };
 
   return (
@@ -310,7 +439,11 @@ const DocumentsPage: React.FC = () => {
           <Typography variant="h6" sx={{ mb: 2, fontWeight: 600 }}>
             Recent Documents
           </Typography>
-          {documents.length === 0 ? (
+          {loading ? (
+            <Box sx={{ display: 'flex', justifyContent: 'center', py: 4 }}>
+              <CircularProgress />
+            </Box>
+          ) : documents.length === 0 ? (
             <Box sx={{ textAlign: 'center', py: 8 }}>
               <DocumentIcon sx={{ fontSize: 64, color: 'text.secondary', mb: 2 }} />
               <Typography variant="h6" color="text.secondary" sx={{ mb: 1 }}>
@@ -493,20 +626,60 @@ const DocumentsPage: React.FC = () => {
         onClose={() => setNotification(null)}
         anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
       >
-        {notification && (
-          <Alert 
-            onClose={() => setNotification(null)} 
-            severity={notification.severity}
-            sx={{ width: '100%' }}
-            icon={
-              notification.severity === 'success' ? <CheckIcon /> : 
-              notification.severity === 'error' ? <ErrorIcon /> : undefined
-            }
-          >
-            {notification.message}
-          </Alert>
-        )}
+        <Alert 
+          onClose={() => setNotification(null)} 
+          severity={notification?.severity || 'info'}
+          sx={{ width: '100%' }}
+          icon={
+            notification?.severity === 'success' ? <CheckIcon /> : 
+            notification?.severity === 'error' ? <ErrorIcon /> : undefined
+          }
+        >
+          {notification?.message || ''}
+        </Alert>
       </Snackbar>
+
+      {/* Document Viewer Drawer */}
+      <Drawer
+        anchor="right"
+        open={documentViewerOpen}
+        onClose={() => setDocumentViewerOpen(false)}
+        sx={{
+          '& .MuiDrawer-paper': {
+            width: { xs: '100%', sm: '80%', md: '70%' },
+            maxWidth: '1200px',
+          },
+        }}
+      >
+        {selectedDocument && (
+          <DocumentViewer
+            documentId={selectedDocument.id}
+            documentName={selectedDocument.name}
+            onClose={() => setDocumentViewerOpen(false)}
+            onRunBacktest={handleRunBacktest}
+          />
+        )}
+      </Drawer>
+
+      {/* Backtest Results Drawer */}
+      <Drawer
+        anchor="right"
+        open={backtestResultsOpen}
+        onClose={() => setBacktestResultsOpen(false)}
+        sx={{
+          '& .MuiDrawer-paper': {
+            width: { xs: '100%', sm: '80%', md: '70%' },
+            maxWidth: '1200px',
+            p: 3,
+          },
+        }}
+      >
+        {selectedBacktestId && (
+          <BacktestResults
+            backtestId={selectedBacktestId}
+          />
+        )}
+      </Drawer>
     </Box>
   );
 };

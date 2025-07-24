@@ -384,15 +384,29 @@ The document processing flow is now fully operational:
 6. **Store**: Results saved to PostgreSQL
 7. **Status**: Updates tracked throughout pipeline
 
-### Next Priority: Interactive UI Components
-The backtesting integration is complete with backtesting.py library providing comprehensive performance metrics and multiple built-in strategies. The final Sprint 2 task is to build interactive UI components for the document viewer to display extracted strategies and backtest results.
+### Sprint 2 Complete (July 24, 2025)
+All Sprint 2 tasks have been successfully completed:
 
-### Remaining Sprint 2 Tasks
-- [✓] WebSocket support for real-time updates - COMPLETED (July 23)
-- [✓] Basic backtesting framework integration - COMPLETED (July 23)
-- [ ] Document viewer UI component
+- ✅ **Document Viewer UI Component**: Full-featured document viewer with:
+  - Parsed document content display with page navigation
+  - Extracted strategies viewer with risk levels and performance metrics
+  - Integration with DocumentsPage using drawer navigation
+  - Download functionality for documents
+  - Run backtest button for each strategy
 
-**Sprint Progress: 7 of 8 tasks completed (87.5%)**
+- ✅ **Backtest Results Component**: Comprehensive results visualization with:
+  - Key performance metrics cards (total return, Sharpe ratio, max drawdown, win rate)
+  - Additional metrics grid (Sortino ratio, profit factor, average win/loss)
+  - Trade history table with P&L tracking
+  - Export results to CSV functionality
+  - Real-time status updates for running backtests
+
+- ✅ **API Service Layer**: Clean service abstractions for:
+  - Documents API (list, upload, download, process, get content/strategies)
+  - Backtests API (create, list, get results, export)
+  - Proper TypeScript types for all API responses
+
+**Sprint Progress: 8 of 8 tasks completed (100%)** 🎉
 
 ### Backtesting Integration Complete (July 23, 2025)
 - ✅ **Backtesting Service**: Full async service with strategy execution

@@ -4,7 +4,6 @@ import {
   Typography,
   Card,
   CardContent,
-  Grid,
   Chip,
   IconButton,
   Menu,
@@ -27,6 +26,7 @@ import {
   InputLabel,
   Select,
   type SelectChangeEvent,
+  Grid,
 } from '@mui/material';
 import {
   TrendingUp as StrategyIcon,
