@@ -512,3 +512,9 @@ All services include health checks and are connected via custom bridge network.
 - **Module Structure**: Backend code is in `src/` but imports don't include `src.` prefix
 - **Worker Commands**: Use `uv run python -m module` to ensure virtual environment is active
 - **SQLAlchemy Models**: Avoid reserved attribute names like `metadata` (use `message_metadata` instead)
+
+### Docker Volume Management (July 24, 2025)
+- **Virtual Environment Conflicts**: Add anonymous volumes for `.venv` directories to prevent host/container conflicts
+- **Volume Syntax**: Use `- /app/.venv` (anonymous volume) to exclude host .venv from being mounted
+- **Applied to Services**: Backend, worker, and backtest-worker services all need this configuration
+- **Error Prevention**: Fixes "FileNotFoundError" and "Directory not empty" errors during container startup

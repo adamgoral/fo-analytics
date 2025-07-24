@@ -280,6 +280,7 @@ None accumulated yet - clean slate for implementation
 47. **Worker Virtual Environment**: Use `uv run python` command for workers to ensure proper package access
 48. **Service Port Documentation**: Frontend runs on port 5173 (Vite default), not 3000
 49. **Tilt Environment Recovery**: Fixed 30+ import errors and configuration issues to restore development environment
+50. **Docker Volume Management**: Fixed container conflicts by adding anonymous volumes for .venv directories
 
 ## Risk Register
 

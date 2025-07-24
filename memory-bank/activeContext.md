@@ -22,6 +22,7 @@ The Portfolio Analytics Dashboard is now fully implemented with 7 comprehensive 
     - Added missing type imports (`Any` in risk metrics)
   - Updated docker-compose.yml worker commands to use `uv run python` for proper virtual environment
   - Corrected frontend port documentation (5173, not 3000)
+  - **Fixed Docker volume conflicts**: Added anonymous volumes for `.venv` directories to prevent host/container conflicts
   - All services now running successfully:
     - Backend API: http://localhost:8000/api/v1/
     - Frontend: http://localhost:5173

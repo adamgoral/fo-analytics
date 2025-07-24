@@ -79,6 +79,7 @@ services:
     volumes:
       - ./backend:/app
       - backend_cache:/app/.cache
+      - /app/.venv
     depends_on:
       postgres:
         condition: service_healthy
@@ -147,6 +148,7 @@ services:
     volumes:
       - ./backend:/app
       - backend_cache:/app/.cache
+      - /app/.venv
     command: uv run python -m worker
     depends_on:
       postgres:
@@ -174,6 +176,7 @@ services:
     volumes:
       - ./backend:/app
       - backend_cache:/app/.cache
+      - /app/.venv
     command: uv run python -m workers.backtest_worker
     depends_on:
       postgres:
