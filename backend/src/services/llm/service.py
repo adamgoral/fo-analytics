@@ -2,13 +2,13 @@
 
 from typing import Optional
 
+import structlog
 from core.config import settings
-from core.logging_config import get_logger
 
 from .base import LLMConfig, LLMProvider, LLMProviderType
 from .factory import LLMProviderFactory
 
-logger = get_logger(__name__)
+logger = structlog.get_logger(__name__)
 
 
 class LLMService:

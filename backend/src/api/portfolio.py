@@ -3,11 +3,13 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from typing import List, Dict, Any, Optional
 from datetime import datetime
+from sqlalchemy.ext.asyncio import AsyncSession
 import structlog
 
-from core.dependencies import get_current_user, get_db
+from core.auth import get_current_active_user
+from core.database import get_db
 from models.user import User, UserRole
-from repositories.unit_of_work import UnitOfWork
+# from repositories.unit_of_work import UnitOfWork  # TODO: Implement UnitOfWork
 from services.backtesting import (
     PortfolioOptimizer,
     MultiStrategyBacktester,
@@ -33,8 +35,8 @@ router = APIRouter(prefix="/portfolio", tags=["portfolio"])
 @router.post("/optimize", response_model=PortfolioOptimizationResponse)
 async def optimize_portfolio(
     request: PortfolioOptimizationRequest,
-    current_user: User = Depends(get_current_user),
-    uow: UnitOfWork = Depends(get_db)
+    current_user: User = Depends(get_current_active_user),
+    db: AsyncSession = Depends(get_db)
 ) -> PortfolioOptimizationResponse:
     """Optimize portfolio allocation using various methods."""
     try:
@@ -114,8 +116,8 @@ async def optimize_portfolio(
 @router.post("/efficient-frontier", response_model=EfficientFrontierResponse)
 async def calculate_efficient_frontier(
     request: EfficientFrontierRequest,
-    current_user: User = Depends(get_current_user),
-    uow: UnitOfWork = Depends(get_db)
+    current_user: User = Depends(get_current_active_user),
+    db: AsyncSession = Depends(get_db)
 ) -> EfficientFrontierResponse:
     """Calculate efficient frontier for given assets."""
     try:
@@ -173,8 +175,8 @@ async def calculate_efficient_frontier(
 @router.post("/multi-strategy-backtest", response_model=MultiStrategyBacktestResponse)
 async def run_multi_strategy_backtest(
     request: MultiStrategyBacktestRequest,
-    current_user: User = Depends(get_current_user),
-    uow: UnitOfWork = Depends(get_db)
+    current_user: User = Depends(get_current_active_user),
+    db: AsyncSession = Depends(get_db)
 ) -> MultiStrategyBacktestResponse:
     """Run a multi-strategy portfolio backtest."""
     try:
@@ -257,7 +259,7 @@ async def run_multi_strategy_backtest(
 @router.post("/risk-metrics", response_model=RiskMetricsResponse)
 async def calculate_risk_metrics(
     request: RiskMetricsRequest,
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(get_current_active_user)
 ) -> RiskMetricsResponse:
     """Calculate comprehensive risk metrics for returns data."""
     try:
@@ -294,7 +296,7 @@ async def calculate_risk_metrics(
 
 @router.get("/optimization-methods")
 async def get_optimization_methods(
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(get_current_active_user)
 ) -> Dict[str, Any]:
     """Get available portfolio optimization methods."""
     return {

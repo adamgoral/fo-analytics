@@ -66,7 +66,7 @@ class ChatMessage(Base, TimestampMixin):
     content: Mapped[str] = mapped_column(Text, nullable=False)
     tokens_used: Mapped[Optional[int]] = mapped_column(Integer, nullable=True)
     model_name: Mapped[Optional[str]] = mapped_column(String(100), nullable=True)
-    metadata: Mapped[Optional[dict]] = mapped_column(JSON, nullable=True)
+    message_metadata: Mapped[Optional[dict]] = mapped_column("metadata", JSON, nullable=True)
     
     # Relationships
     session: Mapped["ChatSession"] = relationship(back_populates="messages")

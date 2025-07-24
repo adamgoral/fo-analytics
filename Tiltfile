@@ -220,7 +220,7 @@ print("""
 
 Services:
   - Backend API: http://localhost:8000
-  - Frontend UI: http://localhost:3000
+  - Frontend UI: http://localhost:5173
   - API Documentation: http://localhost:8000/docs
   - RabbitMQ Management: http://localhost:15672 (guest/guest)
   - MinIO Console: http://localhost:9001 (minioadmin/minioadmin)

@@ -13,7 +13,7 @@ from services.storage import StorageService
 from services.document_parser import DocumentParserService
 from services.llm import LLMService
 from repositories.document import DocumentRepository
-from db.session import get_db
+from core.database import get_db
 from .connection import get_rabbitmq_connection
 from .publisher import MessagePublisher
 from .schemas import DocumentProcessingMessage, MessageStatus

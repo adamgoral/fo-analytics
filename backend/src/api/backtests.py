@@ -9,12 +9,12 @@ import structlog
 
 from core.auth import get_current_active_user
 from core.database import get_db
-from core.dependencies import get_backtest_repository, get_strategy_repository, get_unit_of_work
+from core.dependencies import get_backtest_repository, get_strategy_repository
 from models.user import User
 from models.backtest import BacktestStatus
 from repositories.backtest import BacktestRepository
 from repositories.strategy import StrategyRepository
-from repositories.unit_of_work import UnitOfWork
+# from repositories.unit_of_work import UnitOfWork  # TODO: Implement UnitOfWork
 from schemas.backtest import (
     BacktestCreate,
     BacktestUpdate,
@@ -33,7 +33,7 @@ logger = structlog.get_logger(__name__)
 async def create_backtest(
     backtest_data: BacktestCreate,
     current_user: User = Depends(get_current_active_user),
-    uow: UnitOfWork = Depends(get_unit_of_work),
+    # uow: UnitOfWork = Depends(get_unit_of_work),  # TODO: Implement UnitOfWork
 ):
     """
     Create a new backtest for a strategy and run it asynchronously.

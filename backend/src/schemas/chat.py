@@ -5,7 +5,7 @@ from typing import Optional, List, Dict, Any
 
 from pydantic import BaseModel, Field
 
-from ..models.chat import MessageRole, ConversationContext
+from models.chat import MessageRole, ConversationContext
 
 
 class ChatSessionCreate(BaseModel):

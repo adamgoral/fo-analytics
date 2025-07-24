@@ -106,12 +106,22 @@ The project uses **Tilt.dev** for local development orchestration, providing:
 ```bash
 # Start development environment
 make tilt
+# Or with specific port
+tilt up --port 10350
 
 # Stop environment
 make tilt-down
 
 # Stream logs
 make tilt-logs
+
+# Access services:
+# - Tilt UI: http://localhost:10350
+# - Backend API: http://localhost:8000/api/v1/
+# - Frontend: http://localhost:5173 (not 3000)
+# - API Docs: http://localhost:8000/api/v1/docs
+# - RabbitMQ: http://localhost:15672 (guest/guest)
+# - MinIO: http://localhost:9001 (minioadmin/minioadmin)
 ```
 
 #### Tilt Features Configured
@@ -495,3 +505,10 @@ All services include health checks and are connected via custom bridge network.
 - **Error Handling**: Return processing errors in document status
 - **Streaming**: Use StreamingResponse for large file downloads
 - **LLM Integration**: Decouple LLM service from specific providers for flexibility
+
+### Import Management (July 24, 2025)
+- **Python Imports**: Always use absolute imports (e.g., `from core.config import settings`)
+- **Avoid Relative Imports**: Don't use `..` patterns, they cause issues in Docker environment
+- **Module Structure**: Backend code is in `src/` but imports don't include `src.` prefix
+- **Worker Commands**: Use `uv run python -m module` to ensure virtual environment is active
+- **SQLAlchemy Models**: Avoid reserved attribute names like `metadata` (use `message_metadata` instead)

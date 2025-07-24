@@ -7,10 +7,10 @@ from sqlalchemy import select, func, desc, and_
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
-from ..models.chat import ChatSession, ChatMessage, MessageRole, ConversationContext
-from ..models.user import User
-from ..schemas.chat import ChatSessionCreate, ChatSessionUpdate, ChatMessageCreate
-from .base import BaseRepository
+from models.chat import ChatSession, ChatMessage, MessageRole, ConversationContext
+from models.user import User
+from schemas.chat import ChatSessionCreate, ChatSessionUpdate, ChatMessageCreate
+from repositories.base import BaseRepository
 
 
 class ChatRepository(BaseRepository[ChatSession]):

@@ -7,10 +7,10 @@ from jose import jwt, JWTError
 from typing import Optional
 import uuid
 
-from src.db.database import get_db
-from src.db.models import User
-from src.core.config import settings
-from src.api.websockets import manager
+from core.database import get_db
+from models.user import User
+from core.config import settings
+from api.websockets import manager
 import structlog
 
 logger = structlog.get_logger()

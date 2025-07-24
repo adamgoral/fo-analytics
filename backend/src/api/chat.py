@@ -12,9 +12,9 @@ from core.config import settings
 from models.user import User
 from models.chat import MessageRole
 from repositories.chat_repository import ChatRepository, ChatMessageRepository
-from repositories.document_repository import DocumentRepository
-from repositories.strategy_repository import StrategyRepository
-from repositories.backtest_repository import BacktestRepository
+from repositories.document import DocumentRepository
+from repositories.strategy import StrategyRepository
+from repositories.backtest import BacktestRepository
 from schemas.chat import (
     ChatSessionCreate,
     ChatSessionUpdate,
@@ -25,7 +25,7 @@ from schemas.chat import (
     ChatStreamChunk
 )
 from services.chat_service import ChatService
-from services.llm_service import LLMService
+from services.llm.service import LLMService
 
 
 logger = logging.getLogger(__name__)

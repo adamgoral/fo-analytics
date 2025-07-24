@@ -6,8 +6,8 @@ from typing import Optional
 import structlog
 from aio_pika import IncomingMessage
 
-from core.database import get_async_session
-from repositories.unit_of_work import UnitOfWork
+from core.database import get_db
+# from repositories.unit_of_work import UnitOfWork  # TODO: Implement
 from services.backtesting import BacktestingService
 from websocket_manager import WebSocketNotifier
 from .connection import get_connection_manager

@@ -274,6 +274,12 @@ None accumulated yet - clean slate for implementation
 41. **Redux Async Thunks**: Implemented proper async state management for portfolio API operations
 42. **Test Coverage Excellence**: Achieved 140+ tests with 85-95% coverage across portfolio components
 43. **MUI Grid v7 Migration**: Successfully handled breaking changes in Material-UI Grid component API
+44. **Python Version Compatibility**: Ensure Dockerfile Python version matches pyproject.toml requirements (3.12+)
+45. **Import Path Management**: Use absolute imports throughout backend codebase, avoid relative imports with `..`
+46. **SQLAlchemy Reserved Words**: Avoid using reserved attribute names like `metadata` in models
+47. **Worker Virtual Environment**: Use `uv run python` command for workers to ensure proper package access
+48. **Service Port Documentation**: Frontend runs on port 5173 (Vite default), not 3000
+49. **Tilt Environment Recovery**: Fixed 30+ import errors and configuration issues to restore development environment
 
 ## Risk Register
 

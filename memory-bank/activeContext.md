@@ -11,6 +11,23 @@ The project has successfully completed Sprint 2 with all planned features delive
 
 The Portfolio Analytics Dashboard is now fully implemented with 7 comprehensive components and 140+ test cases. The document processing pipeline is fully operational with AI integration, real-time updates, and backtesting capabilities. Test coverage remains strong across all new features.
 
+### Recent Infrastructure Fix (July 24, 2025)
+- ✅ **Tilt Development Environment Restored**: Fixed all startup issues
+  - Updated Python version to 3.12 in backend Dockerfile to match pyproject.toml requirements
+  - Fixed 30+ import errors throughout the codebase:
+    - Changed relative imports to absolute imports (removed `..` patterns)
+    - Fixed SQLAlchemy reserved attribute name (`metadata` → `message_metadata`)
+    - Updated LLM service imports to correct path (`services.llm.service`)
+    - Fixed database import paths (`db.session` → `core.database`)
+    - Added missing type imports (`Any` in risk metrics)
+  - Updated docker-compose.yml worker commands to use `uv run python` for proper virtual environment
+  - Corrected frontend port documentation (5173, not 3000)
+  - All services now running successfully:
+    - Backend API: http://localhost:8000/api/v1/
+    - Frontend: http://localhost:5173
+    - Workers: Both document and backtest workers operational
+    - Infrastructure: PostgreSQL, Redis, RabbitMQ, MinIO all healthy
+
 ### Recent Updates (Sprint 3 - July 24, 2025)
 - ✅ **Sprint 3 Quick Fixes Completed**: Addressed all minor gaps from Sprint 2
   - Added proper structured logging with context in document upload API
@@ -381,6 +398,9 @@ The Portfolio Analytics Dashboard is now fully implemented with 7 comprehensive 
 - Storybook for UI component development
 - Python imports use clean paths without `src.` prefix (e.g., `from core.config import settings`)
 - **Use Tilt.dev for local development environment** (implemented July 23, 2025)
+- **Python version must match between Dockerfile and pyproject.toml** (3.12+)
+- **Always use absolute imports in Python** (avoid `..` relative imports)
+- **Worker services require `uv run python` command** (not plain `python`)
 
 ## Current Blockers
 None - implementation is progressing smoothly

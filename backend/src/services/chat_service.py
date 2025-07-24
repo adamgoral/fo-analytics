@@ -7,16 +7,16 @@ from datetime import datetime
 
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from ..models.chat import ChatSession, ChatMessage, MessageRole, ConversationContext
-from ..models.document import Document
-from ..models.strategy import Strategy
-from ..models.backtest import Backtest
-from ..repositories.chat_repository import ChatRepository, ChatMessageRepository
-from ..repositories.document_repository import DocumentRepository
-from ..repositories.strategy_repository import StrategyRepository
-from ..repositories.backtest_repository import BacktestRepository
-from ..schemas.chat import ChatSessionCreate, ChatMessageCreate, ChatStreamChunk
-from .llm_service import LLMService
+from models.chat import ChatSession, ChatMessage, MessageRole, ConversationContext
+from models.document import Document
+from models.strategy import Strategy
+from models.backtest import Backtest
+from repositories.chat_repository import ChatRepository, ChatMessageRepository
+from repositories.document import DocumentRepository
+from repositories.strategy import StrategyRepository
+from repositories.backtest import BacktestRepository
+from schemas.chat import ChatSessionCreate, ChatMessageCreate, ChatStreamChunk
+from services.llm.service import LLMService
 
 
 logger = logging.getLogger(__name__)
