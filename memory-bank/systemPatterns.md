@@ -640,8 +640,17 @@ class ErrorResponse(BaseModel):
   - Use `title` not `name` for session/document titles
   - Use `email` not `username` for authentication
   - Map frontend `full_name` to backend `name` if needed
+  - Use `message_metadata` not `metadata` in ChatMessage (SQLAlchemy reserved)
 - **Validation**: Pydantic schemas enforce field names
 - **Benefits**: Reduces mapping errors and confusion
+- **SQLAlchemy Considerations**: Avoid reserved attribute names
+  ```python
+  # Bad: conflicts with SQLAlchemy
+  metadata: Mapped[Optional[dict]] = mapped_column(JSON)
+  
+  # Good: use prefixed name
+  message_metadata: Mapped[Optional[dict]] = mapped_column("metadata", JSON)
+  ```
 
 ## Deployment Patterns
 

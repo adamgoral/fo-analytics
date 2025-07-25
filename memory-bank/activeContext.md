@@ -12,7 +12,24 @@ The project has successfully completed Sprint 2 with all planned features delive
 The Portfolio Analytics Dashboard is now fully implemented with 7 comprehensive components and 140+ test cases. The document processing pipeline is fully operational with AI integration, real-time updates, and backtesting capabilities. Test coverage remains strong across all new features.
 
 ### Most Recent Activity (July 25, 2025 - Latest)
-- ✅ **Fixed Chat Functionality Issues**:
+- ✅ **Additional Chat Functionality Fixes**:
+  - **Missing API Endpoints**: Added missing endpoints expected by frontend
+    - Added GET `/chat/sessions/{id}/messages` for fetching chat messages with pagination
+    - Added DELETE `/chat/sessions/{id}` for deleting chat sessions
+    - Modified GET `/chat/sessions/{id}` to return ChatSessionResponse without messages
+  - **HTML Hydration Error**: Fixed invalid HTML nesting in ChatSidebar
+    - Added `secondaryTypographyProps={{ component: 'div' }}` to ListItemText
+    - Prevents `<div>` inside `<p>` which causes hydration errors
+  - **Metadata Field Access**: Fixed 500 error when fetching messages
+    - ChatMessage model uses `message_metadata` field (to avoid SQLAlchemy reserved name)
+    - Updated API endpoints to access `msg.message_metadata` instead of `msg.metadata`
+    - Fixed in GET messages, POST messages, and repository create_message method
+  - **Error Handling**: Added try-catch blocks with proper logging
+    - Better error messages for debugging API issues
+    - Proper HTTP status codes for different error types
+
+### Previous Chat Fixes (July 25, 2025 - Earlier)
+- ✅ **Initial Chat Functionality Issues Fixed**:
   - **Duplicate API Path Issue**: Fixed frontend adding `/api/v1/` when apiClient already included it
     - Updated all chat service endpoints to remove the duplicate prefix
     - Changed from `/api/v1/chat/sessions` to `/chat/sessions` in service calls
@@ -29,7 +46,6 @@ The Portfolio Analytics Dashboard is now fully implemented with 7 comprehensive 
     - Added `values_callable=lambda x: [e.value for e in x]` to SQLEnum definitions
     - Kept using `auto()` with StrEnum for clean code
     - Database now correctly stores lowercase enum values
-  - Chat sessions can now be created, listed, and managed successfully
 
 ### Previous Activity (July 25, 2025 - Earlier)
 - ✅ **LLM Provider Switch to Google Gemini**:

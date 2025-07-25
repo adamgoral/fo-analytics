@@ -127,12 +127,19 @@
 ## Known Issues
 
 ### Current Issues (July 25, 2025)
-1. **Chat Functionality** - FIXED
-   - Fixed duplicate `/api/v1/` in API paths - frontend was adding prefix when apiClient already included it
-   - Fixed schema mismatches - changed `name` to `title` in all chat-related interfaces
-   - Fixed repository pattern - changed `self.db` to `self.session` in ChatRepository
-   - Fixed response format - backend now returns paginated response `{items, total, skip, limit}`
-   - Fixed enum serialization - added `values_callable` to SQLEnum for proper lowercase values
+1. **Chat Functionality** - FULLY FIXED (Multiple Rounds)
+   - Round 1 Fixes:
+     - Fixed duplicate `/api/v1/` in API paths - frontend was adding prefix when apiClient already included it
+     - Fixed schema mismatches - changed `name` to `title` in all chat-related interfaces
+     - Fixed repository pattern - changed `self.db` to `self.session` in ChatRepository
+     - Fixed response format - backend now returns paginated response `{items, total, skip, limit}`
+     - Fixed enum serialization - added `values_callable` to SQLEnum for proper lowercase values
+   - Round 2 Fixes:
+     - Added missing GET `/chat/sessions/{id}/messages` endpoint for message fetching
+     - Added missing DELETE `/chat/sessions/{id}` endpoint for session deletion
+     - Fixed HTML hydration error with `secondaryTypographyProps={{ component: 'div' }}`
+     - Fixed metadata field access - use `message_metadata` not `metadata` (SQLAlchemy reserved)
+     - Added proper error handling and logging to chat endpoints
 
 ### Previous Issues (July 25, 2025)
 1. **Worker Service API Keys**: Worker service requires `GOOGLE_API_KEY` environment variable to be set for full functionality (switched from Anthropic to Gemini). This is expected behavior but needs to be configured for production use.
@@ -270,6 +277,12 @@ None accumulated yet - clean slate for implementation
 - Beta users: 10 institutions
 - Strategy extraction accuracy: >95%
 - Document processing time: <5 minutes
+
+75. **Missing API Endpoints Pattern**: Frontend may expect endpoints that don't exist - always verify API contract
+76. **HTML Nesting Rules**: Material-UI ListItemText secondary content defaults to <p>, use component prop for <div>
+77. **SQLAlchemy Reserved Fields**: Model attributes like `metadata` conflict with SQLAlchemy, use prefixed names
+78. **Metadata Field Mapping**: When renaming model fields, update all API access points consistently
+79. **Comprehensive API Testing**: Test all CRUD operations to catch missing endpoints early
 
 ## Lessons Learned
 

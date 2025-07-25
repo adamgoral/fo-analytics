@@ -592,3 +592,33 @@ All services include health checks and are connected via custom bridge network.
 - **Benefits**: Clean enum definitions with auto() while ensuring database compatibility
 - **Alternative**: Could use explicit string values but auto() is cleaner
 - **Error Prevention**: Without values_callable, database receives uppercase enum names causing "invalid input value" errors
+
+### API Endpoint Completeness (July 25, 2025)
+- **Frontend-Backend Contract**: Ensure all frontend-expected endpoints exist
+- **Common Missing Endpoints**:
+  - GET endpoints for fetching child resources (e.g., `/sessions/{id}/messages`)
+  - DELETE endpoints for resource removal
+  - Pagination support for list endpoints
+- **Verification Process**: Test all CRUD operations during development
+- **Error Patterns**: 405 Method Not Allowed indicates missing endpoint
+
+### HTML Nesting Rules (July 25, 2025)
+- **Material-UI ListItemText**: Secondary content defaults to `<p>` tag
+- **Fix for Complex Content**: Use `secondaryTypographyProps={{ component: 'div' }}`
+- **Error Message**: "In HTML, <div> cannot be a descendant of <p>"
+- **Common Scenario**: When secondary contains Box or other block elements
+
+### Model Field Access Patterns (July 25, 2025)
+- **SQLAlchemy Reserved Names**: Avoid attributes like `metadata`, `query`, etc.
+- **Field Mapping Pattern**:
+  ```python
+  # Model definition
+  message_metadata: Mapped[Optional[dict]] = mapped_column("metadata", JSON)
+  
+  # API access
+  metadata=msg.message_metadata  # Use the model attribute name
+  
+  # Repository creation
+  message_metadata=metadata  # Pass to model constructor
+  ```
+- **Consistency Rule**: API responses should use frontend-friendly names
