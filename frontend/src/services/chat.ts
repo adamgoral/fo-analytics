@@ -13,12 +13,15 @@ interface PaginatedResponse<T> {
 export interface ChatSession {
   id: string;
   user_id: string;
-  name: string;
+  title: string;
   context_type?: 'general' | 'document' | 'strategy' | 'backtest' | 'portfolio';
   context_id?: string;
-  metadata?: Record<string, any>;
+  context_data?: Record<string, any>;
+  is_active: boolean;
   created_at: string;
   updated_at: string;
+  message_count?: number;
+  last_message_at?: string;
 }
 
 export interface ChatMessage {
@@ -35,14 +38,15 @@ export interface ChatMessage {
 }
 
 export interface CreateChatSessionRequest {
-  name: string;
+  title: string;
   context_type?: 'general' | 'document' | 'strategy' | 'backtest' | 'portfolio';
   context_id?: string;
+  context_data?: Record<string, any>;
 }
 
 export interface UpdateChatSessionRequest {
-  name?: string;
-  metadata?: Record<string, any>;
+  title?: string;
+  is_active?: boolean;
 }
 
 export interface CreateChatMessageRequest {
@@ -59,49 +63,43 @@ export interface ChatMessageResponse {
 export const chatService = {
   // Session management
   async createSession(data: CreateChatSessionRequest): Promise<ChatSession> {
-    const response = await apiClient.post<ChatSession>('/api/v1/chat/sessions', data);
-    return response.data;
+    return await apiClient.post<ChatSession>('/chat/sessions', data);
   },
 
   async getSessions(skip = 0, limit = 20): Promise<PaginatedResponse<ChatSession>> {
-    const response = await apiClient.get<PaginatedResponse<ChatSession>>('/api/v1/chat/sessions', {
+    return await apiClient.get<PaginatedResponse<ChatSession>>('/chat/sessions', {
       params: { skip, limit },
     });
-    return response.data;
   },
 
   async getSession(sessionId: string): Promise<ChatSession> {
-    const response = await apiClient.get<ChatSession>(`/api/v1/chat/sessions/${sessionId}`);
-    return response.data;
+    return await apiClient.get<ChatSession>(`/chat/sessions/${sessionId}`);
   },
 
   async updateSession(sessionId: string, data: UpdateChatSessionRequest): Promise<ChatSession> {
-    const response = await apiClient.patch<ChatSession>(`/api/v1/chat/sessions/${sessionId}`, data);
-    return response.data;
+    return await apiClient.patch<ChatSession>(`/chat/sessions/${sessionId}`, data);
   },
 
   async deleteSession(sessionId: string): Promise<void> {
-    await apiClient.delete(`/api/v1/chat/sessions/${sessionId}`);
+    await apiClient.delete(`/chat/sessions/${sessionId}`);
   },
 
   // Message management
   async getMessages(sessionId: string, skip = 0, limit = 50): Promise<PaginatedResponse<ChatMessage>> {
-    const response = await apiClient.get<PaginatedResponse<ChatMessage>>(
-      `/api/v1/chat/sessions/${sessionId}/messages`,
+    return await apiClient.get<PaginatedResponse<ChatMessage>>(
+      `/chat/sessions/${sessionId}/messages`,
       { params: { skip, limit } }
     );
-    return response.data;
   },
 
   async sendMessage(
     sessionId: string,
     data: CreateChatMessageRequest
   ): Promise<ChatMessage> {
-    const response = await apiClient.post<ChatMessage>(
-      `/api/v1/chat/sessions/${sessionId}/messages`,
+    return await apiClient.post<ChatMessage>(
+      `/chat/sessions/${sessionId}/messages`,
       data
     );
-    return response.data;
   },
 
   // Streaming support for AI responses
@@ -113,7 +111,7 @@ export const chatService = {
     onError: (error: Error) => void
   ): Promise<void> {
     try {
-      const response = await fetch(`${apiClient.defaults.baseURL}/api/v1/chat/sessions/${sessionId}/messages/stream`, {
+      const response = await fetch(`${import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000/api/v1'}/chat/sessions/${sessionId}/messages/stream`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

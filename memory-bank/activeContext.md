@@ -12,6 +12,26 @@ The project has successfully completed Sprint 2 with all planned features delive
 The Portfolio Analytics Dashboard is now fully implemented with 7 comprehensive components and 140+ test cases. The document processing pipeline is fully operational with AI integration, real-time updates, and backtesting capabilities. Test coverage remains strong across all new features.
 
 ### Most Recent Activity (July 25, 2025 - Latest)
+- ✅ **Fixed Chat Functionality Issues**:
+  - **Duplicate API Path Issue**: Fixed frontend adding `/api/v1/` when apiClient already included it
+    - Updated all chat service endpoints to remove the duplicate prefix
+    - Changed from `/api/v1/chat/sessions` to `/chat/sessions` in service calls
+  - **Schema Mismatch**: Fixed frontend-backend field name mismatches
+    - Changed `name` to `title` in ChatSession interfaces and components
+    - Updated ChatSidebar component to use correct field names
+    - Fixed test files to match new schema
+  - **Repository Pattern Fix**: Fixed ChatRepository using wrong session property
+    - Changed `self.db` to `self.session` to match BaseRepository pattern
+  - **Response Format Fix**: Backend was returning array but frontend expected paginated response
+    - Updated backend to return `{items: [...], total: n, skip: n, limit: n}`
+    - Fixed API client trying to unwrap non-existent `.data` property
+  - **SQLAlchemy Enum Serialization**: Fixed enum values being uppercase instead of lowercase
+    - Added `values_callable=lambda x: [e.value for e in x]` to SQLEnum definitions
+    - Kept using `auto()` with StrEnum for clean code
+    - Database now correctly stores lowercase enum values
+  - Chat sessions can now be created, listed, and managed successfully
+
+### Previous Activity (July 25, 2025 - Earlier)
 - ✅ **LLM Provider Switch to Google Gemini**:
   - **Provider Change**: Switched from Anthropic Claude to Google Gemini for cost-effectiveness
     - Updated `.env` with Google API key configuration

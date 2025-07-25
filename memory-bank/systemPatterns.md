@@ -565,6 +565,53 @@ class ErrorResponse(BaseModel):
 - **Business Errors**: Clear messages for domain violations
 - **System Errors**: Generic messages with correlation IDs
 
+## API Response Patterns (✅ Implemented July 25, 2025)
+
+### Paginated Response Pattern
+- **Purpose**: Consistent pagination for list endpoints
+- **Implementation Status**: ✅ Standardized across all list endpoints
+- **Structure**:
+  ```python
+  # Backend response format
+  {
+      "items": [...],     # Array of resources
+      "total": 100,       # Total count
+      "skip": 0,          # Offset
+      "limit": 20         # Page size
+  }
+  
+  # Frontend interface
+  interface PaginatedResponse<T> {
+      items: T[];
+      total: number;
+      skip: number;
+      limit: number;
+  }
+  ```
+- **Benefits**:
+  - Consistent API contract
+  - Frontend can handle all lists uniformly
+  - Supports pagination controls
+  - Enables total count for UI
+- **Usage Examples**:
+  - GET /documents → DocumentListResponse
+  - GET /chat/sessions → ChatSessionListResponse
+  - GET /strategies → StrategyListResponse
+  - GET /backtests → BacktestListResponse
+
+### Direct Response Pattern
+- **API Client Design**: Backend returns data directly, not wrapped
+- **No Success Wrapper**: Responses don't use {success: true, data: ...}
+- **Error Handling**: Errors throw exceptions with proper HTTP codes
+- **Example**:
+  ```typescript
+  // API Client returns data directly
+  async get<T>(url: string): Promise<T> {
+    const response = await axios.get<T>(url);
+    return response.data;  // Direct data, no unwrapping
+  }
+  ```
+
 ## Monitoring Patterns
 
 ### Observability Stack
@@ -586,6 +633,15 @@ class ErrorResponse(BaseModel):
 - **Technical**: API latency, error rates, queue depth
 - **Resource**: CPU, memory, disk usage
 - **Security**: Failed auth attempts, permission denials
+
+### Field Naming Consistency Pattern
+- **Frontend-Backend Alignment**: Field names must match exactly
+- **Common Patterns**:
+  - Use `title` not `name` for session/document titles
+  - Use `email` not `username` for authentication
+  - Map frontend `full_name` to backend `name` if needed
+- **Validation**: Pydantic schemas enforce field names
+- **Benefits**: Reduces mapping errors and confusion
 
 ## Deployment Patterns
 

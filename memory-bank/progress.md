@@ -127,6 +127,14 @@
 ## Known Issues
 
 ### Current Issues (July 25, 2025)
+1. **Chat Functionality** - FIXED
+   - Fixed duplicate `/api/v1/` in API paths - frontend was adding prefix when apiClient already included it
+   - Fixed schema mismatches - changed `name` to `title` in all chat-related interfaces
+   - Fixed repository pattern - changed `self.db` to `self.session` in ChatRepository
+   - Fixed response format - backend now returns paginated response `{items, total, skip, limit}`
+   - Fixed enum serialization - added `values_callable` to SQLEnum for proper lowercase values
+
+### Previous Issues (July 25, 2025)
 1. **Worker Service API Keys**: Worker service requires `GOOGLE_API_KEY` environment variable to be set for full functionality (switched from Anthropic to Gemini). This is expected behavior but needs to be configured for production use.
 2. **Docker Compose Version Warning**: The `version` attribute in docker-compose.yml is obsolete and generates warnings. Can be removed but doesn't affect functionality.
 3. **Database Migration Pending**: New Strategy model fields (code, code_language) need migration to be run for strategy code editor functionality.
@@ -340,6 +348,12 @@ None accumulated yet - clean slate for implementation
 66. **Gemini Model Support**: Added support for newer Gemini models including gemini-2.5-flash-lite in provider validation
 67. **API Key Documentation**: Created comprehensive API Keys Setup guide covering all supported providers with setup instructions
 68. **Environment Variable Propagation**: Ensure all services in docker-compose.yml explicitly receive LLM API keys
+69. **Chat API Schema Consistency**: Frontend and backend must use identical field names (title not name)
+70. **Repository Base Class Pattern**: All repositories inherit from BaseRepository which uses self.session not self.db
+71. **Backend Response Format**: List endpoints should return paginated objects with items array, not raw arrays
+72. **API Client Response Handling**: Backend returns data directly, not wrapped in {success, data} structure
+73. **SQLAlchemy Enum with auto()**: Use values_callable=lambda x: [e.value for e in x] for proper serialization
+74. **StrEnum auto() Behavior**: With StrEnum, auto() creates lowercase values automatically (e.g., GENERAL = "general")
 
 ## Risk Register
 

@@ -32,9 +32,9 @@ class ChatRepository(BaseRepository[ChatSession]):
             context_id=session_data.context_id,
             context_data=session_data.context_data
         )
-        self.db.add(db_session)
-        await self.db.commit()
-        await self.db.refresh(db_session)
+        self.session.add(db_session)
+        await self.session.commit()
+        await self.session.refresh(db_session)
         return db_session
     
     async def get_user_sessions(
@@ -60,7 +60,7 @@ class ChatRepository(BaseRepository[ChatSession]):
         query = query.order_by(desc(ChatSession.updated_at))
         query = query.offset(skip).limit(limit)
         
-        result = await self.db.execute(query)
+        result = await self.session.execute(query)
         sessions = []
         for row in result:
             session = row[0]
@@ -86,7 +86,7 @@ class ChatRepository(BaseRepository[ChatSession]):
                 )
             )
         )
-        result = await self.db.execute(query)
+        result = await self.session.execute(query)
         return result.scalar_one_or_none()
     
     async def update_session(
@@ -104,8 +104,8 @@ class ChatRepository(BaseRepository[ChatSession]):
             setattr(session, field, value)
         
         session.updated_at = datetime.utcnow()
-        await self.db.commit()
-        await self.db.refresh(session)
+        await self.session.commit()
+        await self.session.refresh(session)
         return session
     
     async def get_by_id_and_user(
@@ -120,7 +120,7 @@ class ChatRepository(BaseRepository[ChatSession]):
                 ChatSession.user_id == user_id
             )
         )
-        result = await self.db.execute(query)
+        result = await self.session.execute(query)
         return result.scalar_one_or_none()
 
 
@@ -148,16 +148,16 @@ class ChatMessageRepository(BaseRepository[ChatMessage]):
             model_name=model_name,
             metadata=metadata
         )
-        self.db.add(db_message)
+        self.session.add(db_message)
         
         # Update session's updated_at timestamp
         session_query = select(ChatSession).where(ChatSession.id == session_id)
-        result = await self.db.execute(session_query)
+        result = await self.session.execute(session_query)
         session = result.scalar_one()
         session.updated_at = datetime.utcnow()
         
-        await self.db.commit()
-        await self.db.refresh(db_message)
+        await self.session.commit()
+        await self.session.refresh(db_message)
         return db_message
     
     async def get_session_messages(
@@ -173,7 +173,7 @@ class ChatMessageRepository(BaseRepository[ChatMessage]):
         if limit:
             query = query.limit(limit)
         
-        result = await self.db.execute(query)
+        result = await self.session.execute(query)
         return list(result.scalars().all())
     
     async def get_recent_messages(
@@ -188,7 +188,7 @@ class ChatMessageRepository(BaseRepository[ChatMessage]):
             .order_by(desc(ChatMessage.created_at))
             .limit(limit)
         )
-        result = await self.db.execute(query)
+        result = await self.session.execute(query)
         messages = list(result.scalars().all())
         # Reverse to get chronological order
         return messages[::-1]

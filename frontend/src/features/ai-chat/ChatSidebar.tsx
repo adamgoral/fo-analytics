@@ -55,7 +55,7 @@ const ChatSidebar: React.FC<ChatSidebarProps> = ({ onSessionSelect }) => {
   }>({ element: null, session: null });
   const [newChatDialog, setNewChatDialog] = useState(false);
   const [newChatData, setNewChatData] = useState({
-    name: '',
+    title: '',
     context_type: 'general' as const,
   });
 
@@ -64,16 +64,16 @@ const ChatSidebar: React.FC<ChatSidebarProps> = ({ onSessionSelect }) => {
   }, [dispatch]);
 
   const handleCreateChat = async () => {
-    if (!newChatData.name.trim()) return;
+    if (!newChatData.title.trim()) return;
     
     const result = await dispatch(createSession({
-      name: newChatData.name,
+      title: newChatData.title,
       context_type: newChatData.context_type,
     }));
     
     if (createSession.fulfilled.match(result)) {
       setNewChatDialog(false);
-      setNewChatData({ name: '', context_type: 'general' });
+      setNewChatData({ title: '', context_type: 'general' });
       onSessionSelect(result.payload.id);
     }
   };
@@ -89,7 +89,7 @@ const ChatSidebar: React.FC<ChatSidebarProps> = ({ onSessionSelect }) => {
   };
 
   const filteredSessions = sessions.filter((session) =>
-    session.name.toLowerCase().includes(searchQuery.toLowerCase())
+    session.title.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
   return (
@@ -158,7 +158,7 @@ const ChatSidebar: React.FC<ChatSidebarProps> = ({ onSessionSelect }) => {
                     <ChatIcon />
                   </ListItemIcon>
                   <ListItemText
-                    primary={session.name}
+                    primary={session.title}
                     secondary={
                       <Box>
                         <Typography variant="caption" display="block">
@@ -223,8 +223,8 @@ const ChatSidebar: React.FC<ChatSidebarProps> = ({ onSessionSelect }) => {
             <TextField
               label="Session Name"
               fullWidth
-              value={newChatData.name}
-              onChange={(e) => setNewChatData({ ...newChatData, name: e.target.value })}
+              value={newChatData.title}
+              onChange={(e) => setNewChatData({ ...newChatData, title: e.target.value })}
               autoFocus
             />
             <FormControl fullWidth>
@@ -251,7 +251,7 @@ const ChatSidebar: React.FC<ChatSidebarProps> = ({ onSessionSelect }) => {
           <Button
             onClick={handleCreateChat}
             variant="contained"
-            disabled={!newChatData.name.trim()}
+            disabled={!newChatData.title.trim()}
           >
             Create
           </Button>

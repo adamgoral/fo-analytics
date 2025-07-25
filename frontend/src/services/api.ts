@@ -225,8 +225,8 @@ class ApiClient {
 
   // HTTP methods
   public async get<T>(url: string, config?: AxiosRequestConfig): Promise<T> {
-    const response = await this.client.get<ApiResponse<T>>(url, config);
-    return (response.data as any).data || response.data as T;
+    const response = await this.client.get<T>(url, config);
+    return response.data;
   }
 
   public async post<T>(
@@ -234,8 +234,8 @@ class ApiClient {
     data?: any,
     config?: AxiosRequestConfig
   ): Promise<T> {
-    const response = await this.client.post<ApiResponse<T>>(url, data, config);
-    return (response.data as any).data || response.data as T;
+    const response = await this.client.post<T>(url, data, config);
+    return response.data;
   }
 
   public async put<T>(
@@ -243,8 +243,8 @@ class ApiClient {
     data?: any,
     config?: AxiosRequestConfig
   ): Promise<T> {
-    const response = await this.client.put<ApiResponse<T>>(url, data, config);
-    return (response.data as any).data || response.data as T;
+    const response = await this.client.put<T>(url, data, config);
+    return response.data;
   }
 
   public async patch<T>(
@@ -252,13 +252,13 @@ class ApiClient {
     data?: any,
     config?: AxiosRequestConfig
   ): Promise<T> {
-    const response = await this.client.patch<ApiResponse<T>>(url, data, config);
-    return (response.data as any).data || response.data as T;
+    const response = await this.client.patch<T>(url, data, config);
+    return response.data;
   }
 
   public async delete<T>(url: string, config?: AxiosRequestConfig): Promise<T> {
-    const response = await this.client.delete<ApiResponse<T>>(url, config);
-    return (response.data as any).data || response.data as T;
+    const response = await this.client.delete<T>(url, config);
+    return response.data;
   }
 
   // File upload with progress
@@ -270,7 +270,7 @@ class ApiClient {
     const formData = new FormData();
     formData.append('file', file);
 
-    const response = await this.client.post<ApiResponse<T>>(url, formData, {
+    const response = await this.client.post<T>(url, formData, {
       headers: {
         'Content-Type': 'multipart/form-data',
       },
@@ -282,7 +282,7 @@ class ApiClient {
       },
     });
 
-    return (response.data as any).data || response.data as T;
+    return response.data;
   }
 }
 

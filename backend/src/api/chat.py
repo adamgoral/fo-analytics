@@ -80,11 +80,11 @@ async def create_chat_session(
         logger.error(f"Error creating chat session: {str(e)}")
         raise HTTPException(status_code=400, detail=str(e))
     except Exception as e:
-        logger.error(f"Unexpected error creating chat session: {str(e)}")
-        raise HTTPException(status_code=500, detail="Failed to create chat session")
+        logger.error(f"Unexpected error creating chat session: {str(e)}", exc_info=True)
+        raise HTTPException(status_code=500, detail=f"Failed to create chat session: {str(e)}")
 
 
-@router.get("/sessions", response_model=List[ChatSessionResponse])
+@router.get("/sessions")
 async def list_chat_sessions(
     skip: int = Query(0, ge=0),
     limit: int = Query(20, ge=1, le=100),
@@ -101,7 +101,7 @@ async def list_chat_sessions(
         include_inactive=include_inactive
     )
     
-    return [
+    session_list = [
         ChatSessionResponse(
             id=session.id,
             title=session.title,
@@ -117,6 +117,14 @@ async def list_chat_sessions(
         )
         for session in sessions
     ]
+    
+    # Return paginated response
+    return {
+        "items": session_list,
+        "total": len(session_list),  # This is not accurate for total count
+        "skip": skip,
+        "limit": limit
+    }
 
 
 @router.get("/sessions/{session_id}", response_model=ChatSessionWithMessages)

@@ -35,7 +35,7 @@ class ChatSession(Base, TimestampMixin):
     title: Mapped[str] = mapped_column(String(255), nullable=False)
     user_id: Mapped[int] = mapped_column(ForeignKey("users.id"), nullable=False)
     context_type: Mapped[ConversationContext] = mapped_column(
-        SQLEnum(ConversationContext), 
+        SQLEnum(ConversationContext, values_callable=lambda x: [e.value for e in x]), 
         nullable=False,
         default=ConversationContext.GENERAL
     )
@@ -62,7 +62,7 @@ class ChatMessage(Base, TimestampMixin):
     
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
     session_id: Mapped[int] = mapped_column(ForeignKey("chat_sessions.id"), nullable=False)
-    role: Mapped[MessageRole] = mapped_column(SQLEnum(MessageRole), nullable=False)
+    role: Mapped[MessageRole] = mapped_column(SQLEnum(MessageRole, values_callable=lambda x: [e.value for e in x]), nullable=False)
     content: Mapped[str] = mapped_column(Text, nullable=False)
     tokens_used: Mapped[Optional[int]] = mapped_column(Integer, nullable=True)
     model_name: Mapped[Optional[str]] = mapped_column(String(100), nullable=True)

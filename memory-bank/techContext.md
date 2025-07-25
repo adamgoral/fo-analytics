@@ -26,11 +26,18 @@
 - **Code Quality**: Ruff (linting + formatting)
 
 ### AI/ML Stack
-- **LLM Provider**: Anthropic Claude API ✅ Implemented
-  - Provider pattern with AnthropicProvider class
-  - Claude 3.5 Sonnet model integration
+- **LLM Provider**: Google Gemini (Primary) ✅ Implemented July 25, 2025
+  - Switched from Anthropic Claude to Google Gemini for cost-effectiveness
+  - Provider pattern supports multiple providers (Anthropic, OpenAI, Gemini)
+  - Support for newer Gemini models including gemini-2.5-flash-lite
   - Structured JSON output for strategy extraction
   - Retry logic with exponential backoff
+  - Configuration via environment variables:
+    ```bash
+    LLM_PROVIDER=gemini
+    LLM_MODEL=gemini-2.5-flash-lite
+    GOOGLE_API_KEY=your-api-key-here
+    ```
 - **Document Processing**: LlamaIndex with PyMuPDFReader ✅ Implemented
 - **PDF Parsing**: PyMuPDF (superior to PyPDF2) ✅ Implemented
 - **Text Extraction**: Support for PDF, TXT, Markdown ✅ Implemented
@@ -563,3 +570,25 @@ All services include health checks and are connected via custom bridge network.
   ```
 - **Data Access Pattern**: Access nested array property (e.g., `response.documents.map()`)
 - **API Client Handling**: ApiClient extracts `response.data.data` or falls back to `response.data`
+
+### SQLAlchemy Enum Handling (July 25, 2025)
+- **StrEnum with auto()**: SQLAlchemy requires special handling for Python StrEnum with auto()
+- **values_callable Pattern**: Use to ensure lowercase values are stored in database
+  ```python
+  from enum import StrEnum, auto
+  from sqlalchemy import Enum as SQLEnum
+  
+  class ConversationContext(StrEnum):
+      GENERAL = auto()  # Generates "general"
+      DOCUMENT = auto() # Generates "document"
+  
+  # In SQLAlchemy model
+  context_type: Mapped[ConversationContext] = mapped_column(
+      SQLEnum(ConversationContext, values_callable=lambda x: [e.value for e in x]),
+      nullable=False,
+      default=ConversationContext.GENERAL
+  )
+  ```
+- **Benefits**: Clean enum definitions with auto() while ensuring database compatibility
+- **Alternative**: Could use explicit string values but auto() is cleaner
+- **Error Prevention**: Without values_callable, database receives uppercase enum names causing "invalid input value" errors
