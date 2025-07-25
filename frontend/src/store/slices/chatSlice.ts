@@ -1,5 +1,7 @@
-import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
-import { chatService, ChatSession, ChatMessage, CreateChatSessionRequest } from '../../services/chat';
+import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
+import type { PayloadAction } from '@reduxjs/toolkit';
+import { chatService } from '../../services/chat';
+import type { ChatSession, ChatMessage, CreateChatSessionRequest } from '../../services/chat';
 
 interface ChatState {
   sessions: ChatSession[];

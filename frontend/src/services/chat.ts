@@ -1,4 +1,13 @@
-import { apiClient, PaginatedResponse } from './api';
+import { apiClient } from './api';
+
+// Temporary workaround - define PaginatedResponse locally
+interface PaginatedResponse<T> {
+  items: T[];
+  total: number;
+  page: number;
+  limit: number;
+  pages: number;
+}
 
 // Types for chat functionality
 export interface ChatSession {

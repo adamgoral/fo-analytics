@@ -21,7 +21,7 @@ jest.mock('recharts', () => ({
 }));
 
 // Mock EquityChart component
-jest.mock('../../../components/charts/EquityChart', () => ({
+jest.mock('../../../components/Charts/EquityChart', () => ({
   __esModule: true,
   default: ({ data }: any) => <div data-testid="equity-chart">{JSON.stringify(data)}</div>,
 }));
