@@ -74,6 +74,9 @@ services:
       PYTHONUNBUFFERED: 1
       ENVIRONMENT: development
       PYTHONPATH: /app/src
+      ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:-}
+      OPENAI_API_KEY: ${OPENAI_API_KEY:-}
+      GOOGLE_API_KEY: ${GOOGLE_API_KEY:-}
     ports:
       - "8000:8000"
     volumes:
@@ -173,6 +176,9 @@ services:
       REDIS_URL: redis://redis:6379/0
       RABBITMQ_URL: amqp://fo_user:fo_password@rabbitmq:5672/
       PYTHONPATH: /app/src
+      ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:-}
+      OPENAI_API_KEY: ${OPENAI_API_KEY:-}
+      GOOGLE_API_KEY: ${GOOGLE_API_KEY:-}
     volumes:
       - ./backend:/app
       - backend_cache:/app/.cache

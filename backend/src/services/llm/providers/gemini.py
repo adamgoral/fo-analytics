@@ -26,6 +26,8 @@ class GeminiProvider(LLMProvider):
             "gemini-1.5-flash-latest",
             "gemini-1.0-pro",
             "gemini-pro",
+            "gemini-2.5-flash-lite",
+            "gemini-2.0-flash-latest",
         ]
         
         if self.config.model not in valid_models:

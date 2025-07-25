@@ -127,11 +127,17 @@
 ## Known Issues
 
 ### Current Issues (July 25, 2025)
-1. **Worker Service API Keys**: Worker service requires `ANTHROPIC_API_KEY` environment variable to be set for full functionality. This is expected behavior but needs to be configured for production use.
+1. **Worker Service API Keys**: Worker service requires `GOOGLE_API_KEY` environment variable to be set for full functionality (switched from Anthropic to Gemini). This is expected behavior but needs to be configured for production use.
 2. **Docker Compose Version Warning**: The `version` attribute in docker-compose.yml is obsolete and generates warnings. Can be removed but doesn't affect functionality.
 3. **Database Migration Pending**: New Strategy model fields (code, code_language) need migration to be run for strategy code editor functionality.
 
 ### Recently Resolved Issues (July 25, 2025)
+- ✅ LLM Provider Configuration - FIXED
+  - Switched from Anthropic Claude to Google Gemini for cost-effectiveness
+  - Updated all services in docker-compose.yml to pass API keys
+  - Created comprehensive API Keys Setup documentation
+  - Added support for newer Gemini models (gemini-2.5-flash-lite)
+  - Created test scripts for API key validation
 - ✅ Document list API response error (TypeError: response.map is not a function) - FIXED
   - Frontend expected array but backend returns paginated object
   - Added DocumentListResponse interface matching backend schema
@@ -222,6 +228,14 @@ None accumulated yet - clean slate for implementation
    - Flexible rebalancing frequencies
    - Signal combination with weighted averaging
    - Integration with all optimization methods
+
+### July 25, 2025
+11. **LLM Provider Architecture**
+   - Switched from Anthropic Claude to Google Gemini for cost-effectiveness
+   - Maintained provider abstraction pattern for easy switching
+   - Support for multiple providers (Anthropic, OpenAI, Gemini)
+   - Configuration via environment variables
+   - Comprehensive documentation for API key setup
 
 2. **Architecture Decisions**
    - Microservices over monolith (scalability requirements)
@@ -322,6 +336,10 @@ None accumulated yet - clean slate for implementation
 62. **API Response Structure**: Backend list endpoints return paginated objects, not arrays directly
 63. **Frontend Type Definitions**: Must define interfaces matching backend response schemas (e.g., DocumentListResponse)
 64. **Paginated Response Pattern**: Access data array via response property (e.g., response.documents) not response directly
+65. **LLM Provider Flexibility**: System supports multiple LLM providers (Anthropic, OpenAI, Gemini) with easy switching via environment variables
+66. **Gemini Model Support**: Added support for newer Gemini models including gemini-2.5-flash-lite in provider validation
+67. **API Key Documentation**: Created comprehensive API Keys Setup guide covering all supported providers with setup instructions
+68. **Environment Variable Propagation**: Ensure all services in docker-compose.yml explicitly receive LLM API keys
 
 ## Risk Register
 

@@ -1,6 +1,6 @@
 # Active Context: Front Office Analytics AI Platform
 
-## Current State (July 24, 2025)
+## Current State (July 25, 2025)
 
 ### Project Phase: Sprint 3 In Progress - Advanced Features & Production Readiness
 The project has successfully completed Sprint 2 with all planned features delivered (100% completion). Sprint 3 is progressing well with 72% completion:
@@ -11,7 +11,23 @@ The project has successfully completed Sprint 2 with all planned features delive
 
 The Portfolio Analytics Dashboard is now fully implemented with 7 comprehensive components and 140+ test cases. The document processing pipeline is fully operational with AI integration, real-time updates, and backtesting capabilities. Test coverage remains strong across all new features.
 
-### Most Recent Activity (July 25, 2025)
+### Most Recent Activity (July 25, 2025 - Latest)
+- ✅ **LLM Provider Switch to Google Gemini**:
+  - **Provider Change**: Switched from Anthropic Claude to Google Gemini for cost-effectiveness
+    - Updated `.env` with Google API key configuration
+    - Set `LLM_PROVIDER=gemini` and `LLM_MODEL=gemini-2.5-flash-lite`
+    - Added support for newer Gemini models in provider validation
+  - **Documentation Updates**: 
+    - Created comprehensive API Keys Setup guide at `docs/API_KEYS_SETUP.md`
+    - Updated guide to present all three providers (Gemini, Claude, OpenAI) with Gemini as recommended
+    - Created main `README.md` with quick start instructions
+  - **Environment Configuration**:
+    - Updated `docker-compose.yml` to pass LLM API keys to all services (backend, worker, backtest-worker)
+    - Updated `.env.example` with LLM provider configuration options
+    - Created test scripts for API key validation (`scripts/test_api_key.py`, `scripts/test_gemini_integration.py`)
+  - System now fully configured to use Google Gemini for document analysis and strategy extraction
+
+### Previous Activity (July 25, 2025 - Earlier)
 - ✅ **Fixed Document List API Response Error**:
   - **TypeError: response.map is not a function**: Fixed frontend expecting array but receiving paginated object
     - Added `DocumentListResponse` interface in `/frontend/src/services/documents.ts:54-59`
@@ -444,7 +460,7 @@ The Portfolio Analytics Dashboard is now fully implemented with 7 comprehensive 
 ### Technology Choices
 - **Backend**: Python with FastAPI (confirmed in PRD)
 - **Frontend**: React with TypeScript
-- **AI Integration**: Anthropic Claude API
+- **AI Integration**: Google Gemini (switched from Anthropic Claude for cost-effectiveness)
 - **Database**: PostgreSQL for persistence
 - **Queue**: RabbitMQ for async processing
 - **Cache**: Redis for performance
@@ -463,7 +479,8 @@ The Portfolio Analytics Dashboard is now fully implemented with 7 comprehensive 
 - **TypeScript verbatimModuleSyntax**: Always use `import type` for type-only imports
 
 ## Current Blockers
-None - implementation is progressing smoothly
+- **Database Migration Pending**: Strategy model code fields (code, code_language) need migration to be run for strategy code editor functionality
+- **Worker Service Configuration**: Requires valid Google API key to be set in `.env` file for document processing
 
 ## Technical Achievements (Sprint 1 Complete)
 
