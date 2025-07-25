@@ -146,7 +146,7 @@ class ChatMessageRepository(BaseRepository[ChatMessage]):
             content=content,
             tokens_used=tokens_used,
             model_name=model_name,
-            metadata=metadata
+            message_metadata=metadata  # Fixed: use message_metadata
         )
         self.session.add(db_message)
         

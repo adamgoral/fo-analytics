@@ -165,44 +165,52 @@ async def get_chat_messages(
     db: AsyncSession = Depends(get_db)
 ):
     """Get messages for a chat session."""
-    # First verify the session belongs to the user
-    chat_repo = ChatRepository(db)
-    session = await chat_repo.get_by_id_and_user(
-        session_id=session_id,
-        user_id=current_user.id
-    )
-    
-    if not session:
-        raise HTTPException(status_code=404, detail="Chat session not found")
-    
-    # Get messages
-    message_repo = ChatMessageRepository(db)
-    messages = await message_repo.get_session_messages(
-        session_id=session_id,
-        limit=limit
-    )
-    
-    message_list = [
-        ChatMessageResponse(
-            id=msg.id,
-            session_id=msg.session_id,
-            role=msg.role,
-            content=msg.content,
-            tokens_used=msg.tokens_used,
-            model_name=msg.model_name,
-            metadata=msg.metadata,
-            created_at=msg.created_at
+    try:
+        # First verify the session belongs to the user
+        chat_repo = ChatRepository(db)
+        session = await chat_repo.get_by_id_and_user(
+            session_id=session_id,
+            user_id=current_user.id
         )
-        for msg in messages
-    ]
-    
-    # Return paginated response
-    return {
-        "items": message_list,
-        "total": len(message_list),  # This is not accurate for total count
-        "skip": skip,
-        "limit": limit
-    }
+        
+        if not session:
+            raise HTTPException(status_code=404, detail="Chat session not found")
+        
+        # Get messages
+        message_repo = ChatMessageRepository(db)
+        messages = await message_repo.get_session_messages(
+            session_id=session_id,
+            limit=limit
+        )
+        
+        # Skip messages if needed (not ideal, but works for now)
+        if skip > 0:
+            messages = messages[skip:]
+        
+        message_list = [
+            ChatMessageResponse(
+                id=msg.id,
+                session_id=msg.session_id,
+                role=msg.role,
+                content=msg.content,
+                tokens_used=msg.tokens_used,
+                model_name=msg.model_name,
+                metadata=msg.message_metadata,  # Fixed: use message_metadata
+                created_at=msg.created_at
+            )
+            for msg in messages
+        ]
+        
+        # Return paginated response
+        return {
+            "items": message_list,
+            "total": len(message_list),  # This is not accurate for total count
+            "skip": skip,
+            "limit": limit
+        }
+    except Exception as e:
+        logger.error(f"Error getting chat messages: {str(e)}", exc_info=True)
+        raise HTTPException(status_code=500, detail=f"Failed to get messages: {str(e)}")
 
 
 @router.patch("/sessions/{session_id}", response_model=ChatSessionResponse)
@@ -259,7 +267,7 @@ async def send_message(
             content=assistant_message.content,
             tokens_used=assistant_message.tokens_used,
             model_name=assistant_message.model_name,
-            metadata=assistant_message.metadata,
+            metadata=assistant_message.message_metadata,  # Fixed: use message_metadata
             created_at=assistant_message.created_at
         )
     except ValueError as e:
