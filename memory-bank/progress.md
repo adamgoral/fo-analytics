@@ -132,6 +132,16 @@
 3. **Database Migration Pending**: New Strategy model fields (code, code_language) need migration to be run for strategy code editor functionality.
 
 ### Recently Resolved Issues (July 25, 2025)
+- ✅ Document list API response error (TypeError: response.map is not a function) - FIXED
+  - Frontend expected array but backend returns paginated object
+  - Added DocumentListResponse interface matching backend schema
+  - Updated documentsApi.list() to return correct type
+  - Fixed DocumentsPage to access response.documents array
+- ✅ WebSocket connection errors - FIXED
+  - JWT parsing: Extract user ID from 'sub' field, not email
+  - Database lookup: Use `int(user_id)` for User model primary key
+  - Settings access: Use lowercase attribute names (secret_key, algorithm)
+  - Missing instance: Added `manager = ConnectionManager()` global instance
 - ✅ Authentication API errors (422 on login/register, 401 on /auth/me) - FIXED
   - Login: Changed frontend to send `email` instead of `username`
   - Register: Mapped `full_name` to `name` in API request
@@ -306,6 +316,12 @@ None accumulated yet - clean slate for implementation
 56. **Authentication API Field Mapping**: Frontend login must send `email` not `username`; register must map `full_name` to `name`
 57. **Register Endpoint Response**: Must return TokenResponse with tokens, not just UserResponse
 58. **Token Generation Pattern**: Use `create_token_pair()` from core.security after successful user registration
+59. **WebSocket JWT Parsing**: Extract user ID from token's 'sub' field as string, convert to int for database lookup
+60. **WebSocket Settings Access**: Use lowercase attribute names (settings.secret_key not settings.SECRET_KEY)
+61. **WebSocket Manager Instance**: Must instantiate ConnectionManager globally for use in routes
+62. **API Response Structure**: Backend list endpoints return paginated objects, not arrays directly
+63. **Frontend Type Definitions**: Must define interfaces matching backend response schemas (e.g., DocumentListResponse)
+64. **Paginated Response Pattern**: Access data array via response property (e.g., response.documents) not response directly
 
 ## Risk Register
 

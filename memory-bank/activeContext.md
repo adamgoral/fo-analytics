@@ -12,7 +12,26 @@ The project has successfully completed Sprint 2 with all planned features delive
 The Portfolio Analytics Dashboard is now fully implemented with 7 comprehensive components and 140+ test cases. The document processing pipeline is fully operational with AI integration, real-time updates, and backtesting capabilities. Test coverage remains strong across all new features.
 
 ### Most Recent Activity (July 25, 2025)
-- ✅ **Fixed Authentication API Errors**:
+- ✅ **Fixed Document List API Response Error**:
+  - **TypeError: response.map is not a function**: Fixed frontend expecting array but receiving paginated object
+    - Added `DocumentListResponse` interface in `/frontend/src/services/documents.ts:54-59`
+    - Updated `documentsApi.list()` to return correct paginated response type
+    - Fixed `/frontend/src/features/documents/DocumentsPage.tsx:123` to access `response.documents`
+  - Backend returns paginated response: `{ documents: [...], total: n, skip: n, limit: n }`
+  - Documents list now loads correctly without TypeError
+
+- ✅ **Fixed WebSocket Connection Errors** (Earlier on July 25):
+  - **JWT Token Parsing**: Fixed incorrect token parsing in WebSocket authentication
+    - Updated `/backend/src/api/routes/ws.py:26-30` to extract user ID from 'sub' field
+    - Fixed database lookup to use `int(user_id)` instead of email
+  - **Settings Attribute Names**: Fixed incorrect uppercase attribute access
+    - Changed `settings.SECRET_KEY` to `settings.secret_key`
+    - Changed `settings.ALGORITHM` to `settings.algorithm`
+  - **Missing Manager Instance**: Added missing ConnectionManager instantiation
+    - Added `manager = ConnectionManager()` in `/backend/src/api/websockets.py:220`
+  - WebSocket connections now authenticate and establish properly
+
+- ✅ **Fixed Authentication API Errors** (Earlier on July 25):
   - **Login Error (422)**: Fixed frontend sending `username` instead of `email` in login request
     - Updated `/frontend/src/services/api.ts:295` to send correct field names
   - **Register Error (422)**: Fixed frontend sending `full_name` but backend expecting `name`

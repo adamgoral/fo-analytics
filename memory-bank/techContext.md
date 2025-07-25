@@ -533,3 +533,33 @@ All services include health checks and are connected via custom bridge network.
 - **Register Request**: Frontend sends `full_name` but backend expects `name` - requires mapping in API layer
 - **Register Response**: Backend must return TokenResponse with tokens, not just UserResponse
 - **Token Generation**: After successful registration, generate tokens using `create_token_pair()` before response
+
+### WebSocket Implementation (July 25, 2025)
+- **JWT Token Validation**: WebSocket auth extracts user ID from token's 'sub' field, not email
+- **Database Lookup Pattern**: Convert JWT user_id string to int for SQLAlchemy primary key lookup
+- **Settings Access**: Use lowercase attribute names (`settings.secret_key`, `settings.algorithm`)
+- **ConnectionManager**: Must create global instance `manager = ConnectionManager()` in websockets.py
+- **Error Handling**: Catch both `JWTError` and `ValueError` in token validation
+
+### API Response Patterns (July 25, 2025)
+- **Paginated List Endpoints**: Backend returns objects with data array, not arrays directly
+  ```python
+  # Backend schema
+  class DocumentListResponse(BaseModel):
+      documents: List[DocumentResponse]
+      total: int
+      skip: int
+      limit: int
+  ```
+- **Frontend Type Alignment**: Define interfaces matching backend response schemas
+  ```typescript
+  // Frontend interface
+  interface DocumentListResponse {
+    documents: DocumentResponse[];
+    total: number;
+    skip: number;
+    limit: number;
+  }
+  ```
+- **Data Access Pattern**: Access nested array property (e.g., `response.documents.map()`)
+- **API Client Handling**: ApiClient extracts `response.data.data` or falls back to `response.data`
