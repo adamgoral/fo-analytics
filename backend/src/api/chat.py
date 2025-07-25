@@ -127,15 +127,15 @@ async def list_chat_sessions(
     }
 
 
-@router.get("/sessions/{session_id}", response_model=ChatSessionWithMessages)
+@router.get("/sessions/{session_id}", response_model=ChatSessionResponse)
 async def get_chat_session(
     session_id: int,
     current_user: User = Depends(get_current_active_user),
     db: AsyncSession = Depends(get_db)
 ):
-    """Get a chat session with messages."""
+    """Get a chat session."""
     chat_repo = ChatRepository(db)
-    session = await chat_repo.get_session_with_messages(
+    session = await chat_repo.get_by_id_and_user(
         session_id=session_id,
         user_id=current_user.id
     )
@@ -143,7 +143,7 @@ async def get_chat_session(
     if not session:
         raise HTTPException(status_code=404, detail="Chat session not found")
     
-    return ChatSessionWithMessages(
+    return ChatSessionResponse(
         id=session.id,
         title=session.title,
         user_id=session.user_id,
@@ -152,21 +152,57 @@ async def get_chat_session(
         context_data=session.context_data,
         is_active=session.is_active,
         created_at=session.created_at,
-        updated_at=session.updated_at,
-        messages=[
-            ChatMessageResponse(
-                id=msg.id,
-                session_id=msg.session_id,
-                role=msg.role,
-                content=msg.content,
-                tokens_used=msg.tokens_used,
-                model_name=msg.model_name,
-                metadata=msg.metadata,
-                created_at=msg.created_at
-            )
-            for msg in session.messages
-        ]
+        updated_at=session.updated_at
     )
+
+
+@router.get("/sessions/{session_id}/messages")
+async def get_chat_messages(
+    session_id: int,
+    skip: int = Query(0, ge=0),
+    limit: int = Query(50, ge=1, le=100),
+    current_user: User = Depends(get_current_active_user),
+    db: AsyncSession = Depends(get_db)
+):
+    """Get messages for a chat session."""
+    # First verify the session belongs to the user
+    chat_repo = ChatRepository(db)
+    session = await chat_repo.get_by_id_and_user(
+        session_id=session_id,
+        user_id=current_user.id
+    )
+    
+    if not session:
+        raise HTTPException(status_code=404, detail="Chat session not found")
+    
+    # Get messages
+    message_repo = ChatMessageRepository(db)
+    messages = await message_repo.get_session_messages(
+        session_id=session_id,
+        limit=limit
+    )
+    
+    message_list = [
+        ChatMessageResponse(
+            id=msg.id,
+            session_id=msg.session_id,
+            role=msg.role,
+            content=msg.content,
+            tokens_used=msg.tokens_used,
+            model_name=msg.model_name,
+            metadata=msg.metadata,
+            created_at=msg.created_at
+        )
+        for msg in messages
+    ]
+    
+    # Return paginated response
+    return {
+        "items": message_list,
+        "total": len(message_list),  # This is not accurate for total count
+        "skip": skip,
+        "limit": limit
+    }
 
 
 @router.patch("/sessions/{session_id}", response_model=ChatSessionResponse)
@@ -259,4 +295,28 @@ async def stream_message(
         generate(),
         media_type="text/event-stream"
     )
+
+
+@router.delete("/sessions/{session_id}")
+async def delete_chat_session(
+    session_id: int,
+    current_user: User = Depends(get_current_active_user),
+    db: AsyncSession = Depends(get_db)
+):
+    """Delete a chat session."""
+    chat_repo = ChatRepository(db)
+    
+    # Verify the session belongs to the user
+    session = await chat_repo.get_by_id_and_user(
+        session_id=session_id,
+        user_id=current_user.id
+    )
+    
+    if not session:
+        raise HTTPException(status_code=404, detail="Chat session not found")
+    
+    # Delete the session (messages will be cascade deleted)
+    await chat_repo.delete(session_id)
+    
+    return {"message": "Chat session deleted successfully"}
 

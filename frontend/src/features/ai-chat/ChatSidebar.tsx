@@ -173,6 +173,9 @@ const ChatSidebar: React.FC<ChatSidebarProps> = ({ onSessionSelect }) => {
                       noWrap: true,
                       sx: { fontWeight: currentSession?.id === session.id ? 600 : 400 },
                     }}
+                    secondaryTypographyProps={{
+                      component: 'div',
+                    }}
                   />
                 </ListItemButton>
               </ListItem>
