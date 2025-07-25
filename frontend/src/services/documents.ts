@@ -51,9 +51,16 @@ export interface ExtractedStrategy {
   document_id: string;
 }
 
+export interface DocumentListResponse {
+  documents: DocumentResponse[];
+  total: number;
+  skip: number;
+  limit: number;
+}
+
 export const documentsApi = {
   // Get all documents
-  list: () => apiClient.get<DocumentResponse[]>('/documents'),
+  list: () => apiClient.get<DocumentListResponse>('/documents'),
 
   // Get single document
   get: (id: string) => apiClient.get<DocumentResponse>(`/documents/${id}`),

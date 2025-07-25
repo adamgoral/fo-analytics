@@ -120,7 +120,7 @@ const DocumentsPage: React.FC = () => {
     setLoading(true);
     try {
       const response = await documentsApi.list();
-      const normalizedDocs = response.map(normalizeDocument);
+      const normalizedDocs = response.documents.map(normalizeDocument);
       setDocuments(normalizedDocs);
     } catch (error: any) {
       console.error('Failed to load documents:', error);
