@@ -140,6 +140,13 @@
      - Fixed HTML hydration error with `secondaryTypographyProps={{ component: 'div' }}`
      - Fixed metadata field access - use `message_metadata` not `metadata` (SQLAlchemy reserved)
      - Added proper error handling and logging to chat endpoints
+   - Round 3 Fixes (AI Streaming):
+     - Added missing `generate` and `stream_generate` methods to LLMService class
+     - Switched from Anthropic to Google Gemini for cost-effectiveness (LLM_PROVIDER=gemini)
+     - Fixed model access path: `provider.config.model` instead of `provider.model`
+     - Fixed Gemini streaming format - handles newline-delimited JSON instead of SSE
+     - Updated ChatService to handle both string and object chunks
+     - AI chat now fully functional with streaming responses
 
 ### Previous Issues (July 25, 2025)
 1. **Worker Service API Keys**: Worker service requires `GOOGLE_API_KEY` environment variable to be set for full functionality (switched from Anthropic to Gemini). This is expected behavior but needs to be configured for production use.
@@ -367,6 +374,11 @@ None accumulated yet - clean slate for implementation
 72. **API Client Response Handling**: Backend returns data directly, not wrapped in {success, data} structure
 73. **SQLAlchemy Enum with auto()**: Use values_callable=lambda x: [e.value for e in x] for proper serialization
 74. **StrEnum auto() Behavior**: With StrEnum, auto() creates lowercase values automatically (e.g., GENERAL = "general")
+75. **LLM Service Method Delegation**: LLMService must implement methods that delegate to provider (generate, stream_generate)
+76. **Provider Model Access**: Always access model via `provider.config.model` not `provider.model`
+77. **Gemini Streaming Format**: Gemini API returns newline-delimited JSON, not Server-Sent Events (SSE)
+78. **Stream Chunk Handling**: ChatService must handle both string chunks (Gemini) and object chunks (other providers)
+79. **LLM Provider Switching**: Easy to switch providers via environment variables while maintaining same interface
 
 ## Risk Register
 

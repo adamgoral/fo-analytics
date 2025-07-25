@@ -128,6 +128,61 @@ Please provide a structured analysis of the trading strategies found."""
             }
         }
     
+    async def generate(
+        self,
+        prompt: str,
+        system_prompt: Optional[str] = None,
+        max_tokens: Optional[int] = None,
+        **kwargs
+    ):
+        """Generate a response from the LLM.
+        
+        Args:
+            prompt: The user prompt
+            system_prompt: Optional system prompt for context
+            max_tokens: Optional max tokens override
+            **kwargs: Additional provider-specific parameters
+            
+        Returns:
+            LLMResponse object containing the generated text and metadata
+        """
+        if max_tokens:
+            kwargs['max_tokens'] = max_tokens
+            
+        return await self.provider.generate(
+            prompt=prompt,
+            system_prompt=system_prompt,
+            **kwargs
+        )
+    
+    async def stream_generate(
+        self,
+        prompt: str,
+        system_prompt: Optional[str] = None,
+        max_tokens: Optional[int] = None,
+        **kwargs
+    ):
+        """Stream responses from the LLM.
+        
+        Args:
+            prompt: The user prompt
+            system_prompt: Optional system prompt for context
+            max_tokens: Optional max tokens override
+            **kwargs: Additional provider-specific parameters
+            
+        Yields:
+            String chunks of the response as they arrive
+        """
+        if max_tokens:
+            kwargs['max_tokens'] = max_tokens
+            
+        async for chunk in self.provider.stream_generate(
+            prompt=prompt,
+            system_prompt=system_prompt,
+            **kwargs
+        ):
+            yield chunk
+    
     def get_provider_info(self) -> dict:
         """Get information about the current LLM provider.
         

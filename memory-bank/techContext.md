@@ -29,13 +29,15 @@
 - **LLM Provider**: Google Gemini (Primary) ✅ Implemented July 25, 2025
   - Switched from Anthropic Claude to Google Gemini for cost-effectiveness
   - Provider pattern supports multiple providers (Anthropic, OpenAI, Gemini)
-  - Support for newer Gemini models including gemini-2.5-flash-lite
+  - Support for Gemini models including gemini-1.5-flash
   - Structured JSON output for strategy extraction
   - Retry logic with exponential backoff
+  - Streaming support with newline-delimited JSON format
+  - LLMService delegates to provider methods (generate, stream_generate)
   - Configuration via environment variables:
     ```bash
     LLM_PROVIDER=gemini
-    LLM_MODEL=gemini-2.5-flash-lite
+    LLM_MODEL=gemini-1.5-flash
     GOOGLE_API_KEY=your-api-key-here
     ```
 - **Document Processing**: LlamaIndex with PyMuPDFReader ✅ Implemented
@@ -592,6 +594,46 @@ All services include health checks and are connected via custom bridge network.
 - **Benefits**: Clean enum definitions with auto() while ensuring database compatibility
 - **Alternative**: Could use explicit string values but auto() is cleaner
 - **Error Prevention**: Without values_callable, database receives uppercase enum names causing "invalid input value" errors
+
+### LLM Service Patterns (July 25, 2025)
+- **Method Delegation**: LLMService must implement methods that delegate to the underlying provider
+  ```python
+  class LLMService:
+      async def generate(self, prompt: str, system_prompt: Optional[str] = None, **kwargs):
+          return await self.provider.generate(prompt, system_prompt, **kwargs)
+      
+      async def stream_generate(self, prompt: str, system_prompt: Optional[str] = None, **kwargs):
+          async for chunk in self.provider.stream_generate(prompt, system_prompt, **kwargs):
+              yield chunk
+  ```
+- **Provider Access Pattern**: Always access provider attributes through config
+  ```python
+  # Correct
+  model_name = self.llm_service.provider.config.model
+  
+  # Incorrect - will cause AttributeError
+  model_name = self.llm_service.provider.model
+  ```
+- **Streaming Response Handling**: Different providers return different chunk formats
+  ```python
+  # Gemini returns strings
+  async for text_chunk in provider.stream_generate(...):
+      yield text_chunk  # string
+  
+  # Other providers might return objects
+  async for chunk_obj in provider.stream_generate(...):
+      yield chunk_obj.content  # extract text
+  
+  # ChatService handles both
+  if isinstance(chunk, str):
+      chunk_content = chunk
+  else:
+      chunk_content = chunk.content
+  ```
+- **Gemini Streaming Format**: Newline-delimited JSON, not SSE
+  - Response format: `{...}\n{...}\n{...}`
+  - Each line is a complete JSON object
+  - Must parse incrementally as chunks arrive
 
 ### API Endpoint Completeness (July 25, 2025)
 - **Frontend-Backend Contract**: Ensure all frontend-expected endpoints exist

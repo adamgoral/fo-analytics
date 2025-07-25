@@ -123,7 +123,7 @@ class ChatService:
                 role=MessageRole.ASSISTANT,
                 content=response.content,
                 tokens_used=tokens_used,
-                model_name=self.llm_service.provider.model,
+                model_name=self.llm_service.provider.config.model,
                 metadata={"finish_reason": getattr(response, "stop_reason", None)}
             )
             
@@ -155,12 +155,18 @@ class ChatService:
                 system_prompt=messages[0]["content"] if messages[0]["role"] == "system" else None,
                 max_tokens=2000
             ):
-                full_content += chunk.content
-                if hasattr(chunk, "usage") and chunk.usage:
-                    total_tokens = chunk.usage.total_tokens
+                # Handle both string chunks and object chunks
+                if isinstance(chunk, str):
+                    chunk_content = chunk
+                else:
+                    chunk_content = chunk.content
+                    if hasattr(chunk, "usage") and chunk.usage:
+                        total_tokens = chunk.usage.total_tokens
+                
+                full_content += chunk_content
                 
                 yield ChatStreamChunk(
-                    content=chunk.content,
+                    content=chunk_content,
                     is_final=False
                 )
             
@@ -170,7 +176,7 @@ class ChatService:
                 role=MessageRole.ASSISTANT,
                 content=full_content,
                 tokens_used=total_tokens if total_tokens > 0 else None,
-                model_name=self.llm_service.provider.model
+                model_name=self.llm_service.provider.config.model
             )
             
             # Send final chunk
