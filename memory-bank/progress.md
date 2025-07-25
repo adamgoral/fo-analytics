@@ -132,6 +132,10 @@
 3. **Database Migration Pending**: New Strategy model fields (code, code_language) need migration to be run for strategy code editor functionality.
 
 ### Recently Resolved Issues (July 25, 2025)
+- ✅ Authentication API errors (422 on login/register, 401 on /auth/me) - FIXED
+  - Login: Changed frontend to send `email` instead of `username`
+  - Register: Mapped `full_name` to `name` in API request
+  - Register: Updated backend to return tokens on successful registration
 - ✅ TypeScript import errors due to verbatimModuleSyntax - FIXED (added `import type` for type-only imports)
 
 ### Previously Resolved Issues (July 24, 2025)
@@ -299,6 +303,9 @@ None accumulated yet - clean slate for implementation
 53. **RabbitMQ Connection Pattern**: Use `get_rabbitmq_connection()` function, not `get_connection_manager()`
 54. **Schema Import Cleanup**: Remove imports for non-existent schemas (e.g., ProcessingMode) to prevent import errors
 55. **TypeScript verbatimModuleSyntax Compliance**: Always use `import type` for type-only imports in TypeScript files
+56. **Authentication API Field Mapping**: Frontend login must send `email` not `username`; register must map `full_name` to `name`
+57. **Register Endpoint Response**: Must return TokenResponse with tokens, not just UserResponse
+58. **Token Generation Pattern**: Use `create_token_pair()` from core.security after successful user registration
 
 ## Risk Register
 

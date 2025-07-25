@@ -12,7 +12,17 @@ The project has successfully completed Sprint 2 with all planned features delive
 The Portfolio Analytics Dashboard is now fully implemented with 7 comprehensive components and 140+ test cases. The document processing pipeline is fully operational with AI integration, real-time updates, and backtesting capabilities. Test coverage remains strong across all new features.
 
 ### Most Recent Activity (July 25, 2025)
-- ✅ **Fixed TypeScript Import Errors**:
+- ✅ **Fixed Authentication API Errors**:
+  - **Login Error (422)**: Fixed frontend sending `username` instead of `email` in login request
+    - Updated `/frontend/src/services/api.ts:295` to send correct field names
+  - **Register Error (422)**: Fixed frontend sending `full_name` but backend expecting `name`
+    - Updated `/frontend/src/services/api.ts:298-302` to map `full_name` to `name`
+  - **401 Unauthorized**: Fixed register endpoint not returning authentication tokens
+    - Updated `/backend/src/api/auth.py:25-63` to return `TokenResponse` with tokens
+    - Added token generation after successful registration
+  - All authentication flows now working correctly (login, register, token refresh)
+
+- ✅ **Fixed TypeScript Import Errors** (Earlier on July 25):
   - Updated all TypeScript imports to use `import type` for type-only imports
   - Fixed verbatimModuleSyntax compliance across 9 files:
     - `/src/store/portfolioSlice.ts` - Fixed portfolio type imports

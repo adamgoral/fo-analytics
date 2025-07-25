@@ -292,10 +292,14 @@ export const apiClient = new ApiClient();
 // Convenience exports for common API calls
 export const authApi = {
   login: (email: string, password: string) =>
-    apiClient.post<AuthTokens>('/auth/login', { username: email, password }),
+    apiClient.post<AuthTokens>('/auth/login', { email, password }),
   
   register: (userData: { email: string; password: string; full_name?: string }) =>
-    apiClient.post<AuthTokens>('/auth/register', userData),
+    apiClient.post<AuthTokens>('/auth/register', {
+      email: userData.email,
+      password: userData.password,
+      name: userData.full_name || ''
+    }),
   
   refresh: (refreshToken: string) =>
     apiClient.post<AuthTokens>('/auth/refresh', { refresh_token: refreshToken }),

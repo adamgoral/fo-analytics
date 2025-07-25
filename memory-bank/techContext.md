@@ -526,3 +526,10 @@ All services include health checks and are connected via custom bridge network.
 - **Error Code**: TS1484 indicates missing `type` keyword for type-only imports
 - **Affected Files**: All TypeScript files importing types from other modules
 - **Benefits**: Better tree-shaking, clearer code intent, faster builds
+
+### Authentication API Integration (July 25, 2025)
+- **Frontend-Backend Field Mapping**: Ensure field names match between frontend requests and backend schemas
+- **Login Request**: Frontend must send `{ email, password }` not `{ username, password }`
+- **Register Request**: Frontend sends `full_name` but backend expects `name` - requires mapping in API layer
+- **Register Response**: Backend must return TokenResponse with tokens, not just UserResponse
+- **Token Generation**: After successful registration, generate tokens using `create_token_pair()` before response

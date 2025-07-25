@@ -22,7 +22,7 @@ from utils.logging import logger, set_user_context
 router = APIRouter(prefix="/auth", tags=["authentication"])
 
 
-@router.post("/register", response_model=UserResponse, status_code=status.HTTP_201_CREATED)
+@router.post("/register", response_model=TokenResponse, status_code=status.HTTP_201_CREATED)
 async def register(
     user_data: UserCreate,
     db: AsyncSession = Depends(get_db)
@@ -34,6 +34,8 @@ async def register(
     - **email**: User's email address (must be unique)
     - **password**: Password (minimum 8 characters)
     - **role**: User role (admin, analyst, or viewer). Defaults to viewer
+    
+    Returns access and refresh tokens along with user information.
     """
     auth_service = AuthService(db)
     
@@ -41,13 +43,24 @@ async def register(
     
     try:
         user = await auth_service.register(user_data)
+        
+        # Generate tokens for the newly registered user
+        from core.security import create_token_pair
+        tokens = create_token_pair(str(user.id), user.role.value)
+        
         logger.info(
             "user_registered",
             user_id=str(user.id),
             email=user.email,
             role=user.role.value
         )
-        return user
+        
+        return TokenResponse(
+            access_token=tokens.access_token,
+            refresh_token=tokens.refresh_token,
+            token_type=tokens.token_type,
+            user=UserResponse.model_validate(user)
+        )
     except ValueError as e:
         logger.warning(
             "user_registration_failed",
