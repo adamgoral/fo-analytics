@@ -14,7 +14,7 @@ import {
 } from '@mui/material';
 import { TrendingUp, TrendingDown } from '@mui/icons-material';
 import { useAppSelector } from '../../../store';
-import { PortfolioPosition } from '../../../types/portfolio';
+import type { PortfolioPosition } from '../../../types/portfolio';
 
 const PortfolioOverview: React.FC = () => {
   const { currentPortfolio } = useAppSelector((state) => state.portfolio);

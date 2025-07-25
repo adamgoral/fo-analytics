@@ -1,4 +1,4 @@
-import { PortfolioSummary } from '../../types/portfolio';
+import type { PortfolioSummary } from '../../types/portfolio';
 
 export const mockPortfolioData: PortfolioSummary = {
   total_value: 1250000,

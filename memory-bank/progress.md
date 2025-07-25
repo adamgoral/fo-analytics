@@ -126,12 +126,15 @@
 
 ## Known Issues
 
-### Current Issues (July 24, 2025)
+### Current Issues (July 25, 2025)
 1. **Worker Service API Keys**: Worker service requires `ANTHROPIC_API_KEY` environment variable to be set for full functionality. This is expected behavior but needs to be configured for production use.
 2. **Docker Compose Version Warning**: The `version` attribute in docker-compose.yml is obsolete and generates warnings. Can be removed but doesn't affect functionality.
 3. **Database Migration Pending**: New Strategy model fields (code, code_language) need migration to be run for strategy code editor functionality.
 
-### Recently Resolved Issues (July 24, 2025)
+### Recently Resolved Issues (July 25, 2025)
+- ✅ TypeScript import errors due to verbatimModuleSyntax - FIXED (added `import type` for type-only imports)
+
+### Previously Resolved Issues (July 24, 2025)
 - ✅ Worker service crash due to missing storage_service argument - FIXED
 - ✅ Backtest worker import errors - FIXED
 - ✅ Tilt development environment startup failures - FIXED
@@ -295,6 +298,7 @@ None accumulated yet - clean slate for implementation
 52. **Import Path Corrections**: WebSocketNotifier should be imported from `api.websockets`, not `websocket_manager`
 53. **RabbitMQ Connection Pattern**: Use `get_rabbitmq_connection()` function, not `get_connection_manager()`
 54. **Schema Import Cleanup**: Remove imports for non-existent schemas (e.g., ProcessingMode) to prevent import errors
+55. **TypeScript verbatimModuleSyntax Compliance**: Always use `import type` for type-only imports in TypeScript files
 
 ## Risk Register
 

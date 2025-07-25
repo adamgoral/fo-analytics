@@ -38,7 +38,7 @@ import {
   selectSession,
   deleteSession,
 } from '../../store/slices/chatSlice';
-import { ChatSession } from '../../services/chat';
+import type { ChatSession } from '../../services/chat';
 
 interface ChatSidebarProps {
   onSessionSelect: (sessionId: string) => void;

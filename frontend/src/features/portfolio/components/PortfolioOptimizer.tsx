@@ -31,7 +31,7 @@ import {
   optimizePortfolio,
   setSelectedOptimizationMethod,
 } from '../../../store/portfolioSlice';
-import { OptimizationMethod } from '../../../types/portfolio';
+import type { OptimizationMethod } from '../../../types/portfolio';
 
 const PortfolioOptimizer: React.FC = () => {
   const dispatch = useAppDispatch();

@@ -2,7 +2,8 @@
  * Tests for WebSocket service
  */
 
-import { websocketService, WebSocketMessage } from '../websocket';
+import { websocketService } from '../websocket';
+import type { WebSocketMessage } from '../websocket';
 import { getAuthToken } from '../auth';
 
 // Mock the auth module

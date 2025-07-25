@@ -1,5 +1,6 @@
 import React, { useRef, useState } from 'react';
-import Editor, { Monaco } from '@monaco-editor/react';
+import Editor from '@monaco-editor/react';
+import type { Monaco } from '@monaco-editor/react';
 import { editor } from 'monaco-editor';
 import { Box, Paper, Typography, IconButton, Select, MenuItem, FormControl, InputLabel, Stack } from '@mui/material';
 import { Save as SaveIcon, PlayArrow as RunIcon, ContentCopy as CopyIcon } from '@mui/icons-material';

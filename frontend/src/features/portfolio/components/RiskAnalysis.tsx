@@ -30,7 +30,7 @@ import {
   Refresh,
 } from '@mui/icons-material';
 import { useAppSelector } from '../../../store';
-import { RiskMetricsResponse } from '../../../types/portfolio';
+import type { RiskMetricsResponse } from '../../../types/portfolio';
 
 interface TabPanelProps {
   children?: React.ReactNode;

@@ -40,8 +40,8 @@ import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
 import { useAppDispatch, useAppSelector } from '../../../store';
 import { runMultiStrategyBacktest } from '../../../store/portfolioSlice';
-import { RebalanceFrequency, OptimizationMethod } from '../../../types/portfolio';
-import EquityChart from '../../../components/charts/EquityChart';
+import type { RebalanceFrequency, OptimizationMethod } from '../../../types/portfolio';
+import EquityChart from '../../../components/Charts/EquityChart';
 
 interface StrategyConfig {
   id: string;

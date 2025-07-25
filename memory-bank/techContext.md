@@ -10,6 +10,7 @@
 - **Testing**: Jest + React Testing Library
 - **Storybook**: For component development
 - **Code Quality**: ESLint + Prettier
+- **TypeScript Config**: `verbatimModuleSyntax` enabled - requires `import type` for type-only imports ✅
 
 ### Backend
 - **Language**: Python 3.11+
@@ -518,3 +519,10 @@ All services include health checks and are connected via custom bridge network.
 - **Volume Syntax**: Use `- /app/.venv` (anonymous volume) to exclude host .venv from being mounted
 - **Applied to Services**: Backend, worker, and backtest-worker services all need this configuration
 - **Error Prevention**: Fixes "FileNotFoundError" and "Directory not empty" errors during container startup
+
+### TypeScript Import Management (July 25, 2025)
+- **verbatimModuleSyntax**: TypeScript compiler option requires explicit `import type` for type-only imports
+- **Import Syntax**: Use `import type { TypeName }` instead of `import { TypeName }` for types/interfaces
+- **Error Code**: TS1484 indicates missing `type` keyword for type-only imports
+- **Affected Files**: All TypeScript files importing types from other modules
+- **Benefits**: Better tree-shaking, clearer code intent, faster builds
