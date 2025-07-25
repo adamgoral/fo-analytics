@@ -22,14 +22,14 @@ oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/v1/auth/login")
 async def get_current_user_from_token(token: str, db: AsyncSession) -> Optional[User]:
     """Extract user from JWT token."""
     try:
-        payload = jwt.decode(token, settings.SECRET_KEY, algorithms=[settings.ALGORITHM])
-        email: str = payload.get("sub")
-        if email is None:
+        payload = jwt.decode(token, settings.secret_key, algorithms=[settings.algorithm])
+        user_id: str = payload.get("sub")
+        if user_id is None:
             return None
             
-        user = await db.get(User, email)
+        user = await db.get(User, int(user_id))
         return user
-    except JWTError:
+    except (JWTError, ValueError):
         return None
 
 

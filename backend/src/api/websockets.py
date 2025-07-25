@@ -216,4 +216,6 @@ class WebSocketNotifier:
             await manager.broadcast(notification)
 
 
+# Global instances
+manager = ConnectionManager()
 notifier = WebSocketNotifier()
