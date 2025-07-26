@@ -148,10 +148,16 @@
      - Updated ChatService to handle both string and object chunks
      - AI chat now fully functional with streaming responses
 
-### Previous Issues (July 25, 2025)
+### Current Issues (July 26, 2025)
 1. **Worker Service API Keys**: Worker service requires `GOOGLE_API_KEY` environment variable to be set for full functionality (switched from Anthropic to Gemini). This is expected behavior but needs to be configured for production use.
 2. **Docker Compose Version Warning**: The `version` attribute in docker-compose.yml is obsolete and generates warnings. Can be removed but doesn't affect functionality.
-3. **Database Migration Pending**: New Strategy model fields (code, code_language) need migration to be run for strategy code editor functionality.
+
+### Recently Resolved Issues (July 26, 2025)
+- ✅ Database Migration for Strategy Code Fields - FIXED
+  - Created and ran Alembic migration `c2deb7c267b4_add_code_fields_to_strategies`
+  - Added `code` (Text) and `code_language` (String) columns to strategies table
+  - Verified columns exist in database with correct types
+  - Strategy code editor functionality now fully operational
 
 ### Recently Resolved Issues (July 25, 2025)
 - ✅ LLM Provider Configuration - FIXED
